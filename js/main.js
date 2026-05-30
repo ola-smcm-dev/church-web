@@ -53,7 +53,7 @@ const CONFIG = {
   // Sheet columns: Date (YYYY-MM-DD) | Title | Time | Description | Active (Yes/No)
   // File → Share → Publish to web → Sheet1 → CSV → Publish
   // Leave blank to use the hardcoded items in index.html.
-  eventsSheetUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSluQ2kZE_gDTLtpDOkBMlSUBLH9hroTEw3sm3g4AMwYAcyH1FHImxiTXldXHqttzvFnL7JG6K6dlIg/pub?gid=1327592415&single=true&output=csv",
+  eventsSheetUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSluQ2kZE_gDTLtpDOkBMlSUBLH9hroTEw3sm3g4AMwYAcyH1FHImxiTXldXHqttzvFnL7JG6K6dlIg/pub?gid=2077561181&single=true&output=csv",
 
   // ── Parish Posters (Google Sheets) ───────────────
   // Sheet columns: Title | Date (YYYY-MM-DD) | ImageFileId | Description | Active (Yes/No)
