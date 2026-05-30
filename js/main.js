@@ -47,13 +47,13 @@ const CONFIG = {
   // Sheet columns: Text | Active (Yes/No)
   // File → Share → Publish to web → Sheet1 → CSV → Publish
   // Leave blank to use the hardcoded items in index.html.
-  announcementsSheetUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vS015wMOE_mFsM5CBcy6y1tUOmgIv65l09vcbQMiLVQ7SukfgKlA_wudqRPDxDlGpQWCXg0-hpttzaH/pub?gid=0&single=true&output=csv",
+  announcementsSheetUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSluQ2kZE_gDTLtpDOkBMlSUBLH9hroTEw3sm3g4AMwYAcyH1FHImxiTXldXHqttzvFnL7JG6K6dlIg/pub?gid=0&single=true&output=csv",
 
   // ── Upcoming Events (Google Sheets) ──────────────
   // Sheet columns: Date (YYYY-MM-DD) | Title | Time | Description | Active (Yes/No)
   // File → Share → Publish to web → Sheet1 → CSV → Publish
   // Leave blank to use the hardcoded items in index.html.
-  eventsSheetUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vT_xH4EiQmQiMzU1LnmzLb6yeOpHoKnDoT-vlv8oiGINHjB4CMgd53VN7s9PpFe1RMZHXAiqQRmS-GF/pub?gid=0&single=true&output=csv",
+  eventsSheetUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSluQ2kZE_gDTLtpDOkBMlSUBLH9hroTEw3sm3g4AMwYAcyH1FHImxiTXldXHqttzvFnL7JG6K6dlIg/pub?gid=1327592415&single=true&output=csv",
 
   // ── Parish Posters (Google Sheets) ───────────────
   // Sheet columns: Title | Date (YYYY-MM-DD) | ImageFileId | Description | Active (Yes/No)
@@ -62,7 +62,7 @@ const CONFIG = {
   //   Just copy the FILE_ID_HERE part into the sheet.
   // File → Share → Publish to web → Sheet1 → CSV → Publish
   // Section is hidden automatically when no active posters exist.
-  postersSheetUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRZ_sZ9TFSsNCRbX9EPGb78i-q674F7RAPraGvLuDSv-TpJsCGer3AXWFLR8NhvpFf_pXKPQZ9dt-Y5/pub?gid=0&single=true&output=csv",
+  postersSheetUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSluQ2kZE_gDTLtpDOkBMlSUBLH9hroTEw3sm3g4AMwYAcyH1FHImxiTXldXHqttzvFnL7JG6K6dlIg/pub?gid=2077561181&single=true&output=csv",
 };
 
 /* ═════════════════════════════════════════════════════
