@@ -63,6 +63,11 @@ const CONFIG = {
   // File → Share → Publish to web → Sheet1 → CSV → Publish
   // Section is hidden automatically when no active posters exist.
   postersSheetUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSluQ2kZE_gDTLtpDOkBMlSUBLH9hroTEw3sm3g4AMwYAcyH1FHImxiTXldXHqttzvFnL7JG6K6dlIg/pub?gid=2077561181&single=true&output=csv",
+
+  // ── WhatsApp Join Request (Google Apps Script) ────
+  // Submits join requests to Google Sheets and triggers email notification.
+  // Deploy your Apps Script as a Web App (Execute as: Me, Access: Anyone)
+  whatsappFormUrl: "https://script.google.com/macros/s/AKfycbzts7DEdylQz72HWe8Zi6r2iUL7k5_TtDmnVTrwJFLGymWizmcBkqZaF2tQwbfR8JdD_A/exec",
 };
 
 /* ═════════════════════════════════════════════════════
@@ -792,18 +797,24 @@ function initWhatsAppModal() {
     var mobile = mobileInput.value.trim();
     var info   = infoInput.value.trim();
 
-    var subject = encodeURIComponent("WhatsApp Group Join Request — " + name);
-    var body    = encodeURIComponent(
-      "Name: " + name + "\n" +
-      "Mobile: " + mobile + "\n\n" +
-      "About me & my family:\n" + info
-    );
+    var submitBtn = form.querySelector("button[type=submit]");
+    if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = "Sending…"; }
 
-    window.location.href = "mailto:" + CONFIG.email +
-      "?subject=" + subject + "&body=" + body;
-
-    closeModal();
-    form.reset();
+    fetch(CONFIG.whatsappFormUrl, {
+      method: "POST",
+      body:   JSON.stringify({ name: name, mobile: mobile, about: info })
+    })
+    .then(function () {
+      closeModal();
+      form.reset();
+      alert("Thank you, " + name + "! Your request has been received. We will add you to the WhatsApp group shortly.");
+    })
+    .catch(function () {
+      alert("Something went wrong. Please try again or contact us directly.");
+    })
+    .finally(function () {
+      if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = "Send Request"; }
+    });
   });
 
   // ── Helpers ──
