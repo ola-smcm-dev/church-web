@@ -1251,8 +1251,7 @@ body.sticky-visible .hero-nav-drawer { top: calc(var(--topbar-height) + 62px); }
 
 .hg-announce-scroll {
   overflow: hidden;
-  /* height = 5 items × ~2.2rem per item */
-  height: 6.5rem;
+  /* height set dynamically by JS to fit exactly 3 items */
   position: relative;
 }
 

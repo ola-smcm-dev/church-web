@@ -491,6 +491,23 @@ function initAnnouncements() {
   var CACHE_KEY = "ola_announcements";
   var timer, scrollEl;
 
+  // ── Set scroll container height to fit exactly 3 items ──
+  function setHeight() {
+    var items = track.querySelectorAll(".hg-announce-item");
+    if (!items.length) return;
+    var h = 0;
+    var count = Math.min(3, items.length);
+    for (var i = 0; i < count; i++) h += items[i].getBoundingClientRect().height;
+    if (h > 0) track.parentElement.style.height = h + "px";
+  }
+
+  // ── Sum pixel heights of items 0..upTo-1 (for variable-height scroll) ──
+  function getPx(items, upTo) {
+    var px = 0;
+    for (var i = 0; i < upTo; i++) px += items[i].getBoundingClientRect().height;
+    return px;
+  }
+
   // ── Render items into the track ──
   function renderItems(items) {
     if (!items || !items.length) return;
@@ -499,23 +516,24 @@ function initAnnouncements() {
     track.innerHTML = items.map(function (text) {
       return '<p class="hg-announce-item">' + escapeHtml(text) + '</p>';
     }).join("");
+    setTimeout(setHeight, 0);
   }
 
   // ── Start auto-scroll (safe to call multiple times) ──
   function startScroll() {
     clearInterval(timer);
     var items = track.querySelectorAll(".hg-announce-item");
-    if (items.length <= 5) return;
+    if (items.length <= 3) return;
 
     var offset    = 0;
-    var maxOffset = items.length - 5;
+    var maxOffset = items.length - 3;
 
     track.style.transition = "none";
     track.style.transform  = "translateY(0)";
 
     function scrollNext() {
       var liveItems = track.querySelectorAll(".hg-announce-item");
-      maxOffset = liveItems.length - 5;
+      maxOffset = liveItems.length - 3;
       if (offset >= maxOffset) {
         track.style.transition = "none";
         track.style.transform  = "translateY(0)";
@@ -523,9 +541,8 @@ function initAnnouncements() {
         return;
       }
       offset++;
-      var itemH = liveItems[0].getBoundingClientRect().height;
       track.style.transition = "transform 0.7s ease";
-      track.style.transform  = "translateY(-" + (offset * itemH) + "px)";
+      track.style.transform  = "translateY(-" + getPx(liveItems, offset) + "px)";
     }
 
     timer = setInterval(scrollNext, 4000);
