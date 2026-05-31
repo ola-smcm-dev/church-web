@@ -350,6 +350,72 @@ address { font-style: normal; }
 }
 .sticky-nav-donate:hover { background: var(--gold-light) !important; color: var(--navy-dark) !important; }
 
+/* ── Nav Dropdown (Links menu) ── */
+.nav-dropdown { position: relative; }
+
+.nav-dropdown-toggle {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: .8rem;
+  font-family: inherit;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  padding: .35rem .6rem;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+.nav-dropdown-toggle:hover { color: var(--gold-light); background: rgba(255,255,255,.07); }
+
+.nav-dropdown-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  background: var(--navy-dark);
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: 4px;
+  min-width: 170px;
+  list-style: none;
+  padding: .3rem 0;
+  margin: 0;
+  z-index: 200;
+  box-shadow: 0 4px 16px rgba(0,0,0,.35);
+}
+.nav-dropdown-menu li a {
+  display: block;
+  color: #fff;
+  font-size: .8rem;
+  padding: .5rem 1rem;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.nav-dropdown-menu li a:hover { color: var(--gold-light); background: rgba(255,255,255,.07); }
+
+.nav-dropdown.open .nav-dropdown-menu { display: block; }
+
+/* Mobile dropdown */
+@media (max-width: 768px) {
+  .nav-dropdown-toggle {
+    width: 100%;
+    text-align: right;
+    padding: .5rem .65rem;
+    font-size: .85rem;
+  }
+  .nav-dropdown-menu {
+    position: static;
+    box-shadow: none;
+    border: none;
+    border-top: 1px solid rgba(255,255,255,.1);
+    background: rgba(255,255,255,.05);
+    border-radius: 0;
+    min-width: unset;
+    width: 100%;
+  }
+  .nav-dropdown-menu li a { text-align: right; font-size: .85rem; }
+}
+
 /* ══════════════════════════════════════════
    HERO HEADER — overlaid on church photo
 ══════════════════════════════════════════ */

@@ -87,6 +87,7 @@ document.addEventListener("DOMContentLoaded", function () {
   initEvents();
   initPosters();
   initWhatsAppModal();
+  initNavDropdown();
 });
 
 /* ─────────────────────────────────────────────────────
@@ -212,6 +213,35 @@ function initNav() {
     if (scrolledPast && !wasPast) menuOpen = false; // hand off to scroll, close menu
     update();
   }, { passive: true });
+}
+
+/* ─────────────────────────────────────────────────────
+   NAV DROPDOWN — Links menu
+   ───────────────────────────────────────────────────── */
+function initNavDropdown() {
+  var dropdown = document.querySelector(".nav-dropdown");
+  if (!dropdown) return;
+  var toggle = dropdown.querySelector(".nav-dropdown-toggle");
+
+  toggle.addEventListener("click", function (e) {
+    e.stopPropagation();
+    var open = dropdown.classList.toggle("open");
+    toggle.setAttribute("aria-expanded", open ? "true" : "false");
+  });
+
+  // Close when clicking outside
+  document.addEventListener("click", function () {
+    dropdown.classList.remove("open");
+    toggle.setAttribute("aria-expanded", "false");
+  });
+
+  // Close when a link inside is clicked
+  dropdown.querySelectorAll(".nav-dropdown-menu a").forEach(function (link) {
+    link.addEventListener("click", function () {
+      dropdown.classList.remove("open");
+      toggle.setAttribute("aria-expanded", "false");
+    });
+  });
 }
 
 /* ─────────────────────────────────────────────────────
