@@ -87,6 +87,7 @@ document.addEventListener("DOMContentLoaded", function () {
   initEvents();
   initPosters();
   initWhatsAppModal();
+  initContactModal();
   initNavDropdown();
 });
 
@@ -782,6 +783,102 @@ function initPosters() {
       renderCarousel(fresh);
     })
     .catch(function () {});
+}
+
+/* ─────────────────────────────────────────────────────
+   CONTACT FORM MODAL
+   ───────────────────────────────────────────────────── */
+function initContactModal() {
+  var modal    = document.getElementById("contactModal");
+  var backdrop = document.getElementById("contactModalBackdrop");
+  var closeBtn = document.getElementById("contactModalClose");
+  var form     = document.getElementById("contactForm");
+  if (!modal || !form) return;
+
+  var nameInput    = document.getElementById("ctName");
+  var emailInput   = document.getElementById("ctEmail");
+  var messageInput = document.getElementById("ctMessage");
+  var nameErr      = document.getElementById("ctNameErr");
+  var emailErr     = document.getElementById("ctEmailErr");
+  var messageErr   = document.getElementById("ctMessageErr");
+
+  // Intercept all mailto email links
+  var emailLinks = [
+    document.getElementById("topbarEmail"),
+    document.getElementById("contactEmail"),
+    document.getElementById("footerEmail"),
+  ];
+  emailLinks.forEach(function (el) {
+    if (!el) return;
+    el.removeAttribute("href");
+    el.style.cursor = "pointer";
+    el.addEventListener("click", function (e) { e.preventDefault(); openModal(); });
+  });
+
+  closeBtn.addEventListener("click", closeModal);
+  backdrop.addEventListener("click", closeModal);
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && !modal.hidden) closeModal();
+  });
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    if (!validate()) return;
+
+    var submitBtn = form.querySelector("button[type=submit]");
+    if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = "Sending…"; }
+
+    fetch(CONFIG.whatsappFormUrl, {
+      method: "POST",
+      body: JSON.stringify({
+        type:    "contact",
+        name:    nameInput.value.trim(),
+        email:   emailInput.value.trim(),
+        message: messageInput.value.trim()
+      })
+    })
+    .then(function () {
+      closeModal();
+      form.reset();
+      alert("Thank you! Your message has been received. We will get back to you soon.");
+    })
+    .catch(function () {
+      alert("Something went wrong. Please try again or call us directly.");
+    })
+    .finally(function () {
+      if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = "Send Message"; }
+    });
+  });
+
+  function openModal() {
+    modal.hidden = false;
+    document.body.style.overflow = "hidden";
+    setTimeout(function () { nameInput.focus(); }, 50);
+  }
+
+  function closeModal() {
+    modal.hidden = true;
+    document.body.style.overflow = "";
+    clearErrors();
+  }
+
+  function validate() {
+    var ok = true;
+    if (!nameInput.value.trim())    { setError(nameInput,    nameErr,    true);  ok = false; } else { setError(nameInput,    nameErr,    false); }
+    if (!emailInput.value.trim())   { setError(emailInput,   emailErr,   true);  ok = false; } else { setError(emailInput,   emailErr,   false); }
+    if (!messageInput.value.trim()) { setError(messageInput, messageErr, true);  ok = false; } else { setError(messageInput, messageErr, false); }
+    return ok;
+  }
+
+  function setError(field, errEl, show) {
+    field.classList.toggle("invalid", show);
+    errEl.classList.toggle("visible", show);
+  }
+
+  function clearErrors() {
+    [nameInput, emailInput, messageInput].forEach(function (f) { f.classList.remove("invalid"); });
+    [nameErr, emailErr, messageErr].forEach(function (e) { e.classList.remove("visible"); });
+  }
 }
 
 /* ─────────────────────────────────────────────────────

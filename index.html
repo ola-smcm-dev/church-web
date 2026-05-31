@@ -580,6 +580,46 @@ Whether you are deeply rooted in the Syro-Malabar tradition or looking to experi
     </div>
   </div>
 
+  <!-- ═══════════════════════════════════════════
+       CONTACT FORM MODAL
+  ═══════════════════════════════════════════ -->
+  <div id="contactModal" class="wa-modal" role="dialog" aria-modal="true" aria-labelledby="contactModalTitle" hidden>
+    <div class="wa-modal-backdrop" id="contactModalBackdrop"></div>
+    <div class="wa-modal-box">
+
+      <button class="wa-modal-close" id="contactModalClose" aria-label="Close">&#x2715;</button>
+
+      <div class="wa-modal-header">
+        <svg class="wa-modal-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor">
+          <path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"/>
+        </svg>
+        <h2 id="contactModalTitle">Send Us a Message</h2>
+        <p class="wa-modal-sub">We'll get back to you as soon as possible.</p>
+      </div>
+
+      <form id="contactForm" class="wa-form" novalidate>
+        <div class="wa-field">
+          <label for="ctName">Full Name <span class="wa-required" aria-hidden="true">*</span></label>
+          <input type="text" id="ctName" name="name" required autocomplete="name" placeholder="Your full name">
+          <span class="wa-error" id="ctNameErr">Please enter your name.</span>
+        </div>
+        <div class="wa-field">
+          <label for="ctEmail">Email Address <span class="wa-required" aria-hidden="true">*</span></label>
+          <input type="email" id="ctEmail" name="email" required autocomplete="email" placeholder="your@email.com">
+          <span class="wa-error" id="ctEmailErr">Please enter your email address.</span>
+        </div>
+        <div class="wa-field">
+          <label for="ctMessage">Message <span class="wa-required" aria-hidden="true">*</span></label>
+          <textarea id="ctMessage" name="message" rows="4" required placeholder="How can we help you?"></textarea>
+          <span class="wa-error" id="ctMessageErr">Please enter your message.</span>
+        </div>
+        <p class="wa-required-note"><span aria-hidden="true">*</span> Required fields</p>
+        <button type="submit" class="wa-submit">Send Message</button>
+      </form>
+
+    </div>
+  </div>
+
   <script src="js/main.js"></script>
 
   <!-- Facebook SDK (loaded after page for performance) -->
