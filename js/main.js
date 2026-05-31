@@ -17,8 +17,8 @@ const CONFIG = {
   // ── Contact Details ──────────────────────────────
   // These update the contact section and footer automatically.
   address:           "838 Kings Hwy E, Fairfield, CT 06825",
-  phone:             "(203) 216-4859",
-  phoneTel:          "+12032164859",     // E.164 format for tel: links
+  phone:             "(203) 274-2702",
+  phoneTel:          "+12032742702",     // E.164 format for tel: links
   email:             "smcc.norwalk@gmail.com",
 
   // ── Donation ─────────────────────────────────────
