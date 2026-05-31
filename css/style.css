@@ -1069,7 +1069,9 @@ body.sticky-visible .hero-nav-drawer { top: calc(var(--topbar-height) + 62px); }
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: .25rem;
+  min-height: 9.5rem;
   box-shadow: var(--shadow-sm);
   transition: box-shadow var(--transition), transform var(--transition);
 }
@@ -1094,6 +1096,14 @@ body.sticky-visible .hero-nav-drawer { top: calc(var(--topbar-height) + 62px); }
   font-size: .72rem;
   color: var(--text-muted);
 }
+
+.staff-phone {
+  font-size: .72rem;
+  color: var(--navy);
+  text-decoration: none;
+  margin-top: .1rem;
+}
+.staff-phone:hover { text-decoration: underline; color: var(--gold); }
 
 /* ── Right col — Support Our Parish ── */
 .hg-donate {
