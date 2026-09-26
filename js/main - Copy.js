@@ -153,7 +153,6 @@ function applyConfig() {
 
   // Facebook links
   var fbLinks = [
-    document.getElementById("topbarFacebook"),
     document.getElementById("contactFacebook"),
     document.getElementById("footerFacebook"),
   ];
@@ -163,7 +162,6 @@ function applyConfig() {
 
   // YouTube links
   var ytLinks = [
-    document.getElementById("topbarYoutube"),
     document.getElementById("contactYoutube"),
     document.getElementById("footerYoutube"),
   ];
@@ -173,7 +171,6 @@ function applyConfig() {
 
   // Instagram links
   var igLinks = [
-    document.getElementById("topbarInstagram"),
     document.getElementById("contactInstagram"),
     document.getElementById("footerInstagram"),
   ];
@@ -181,17 +178,14 @@ function applyConfig() {
     if (el) el.href = CONFIG.instagramUrl;
   });
 
-  // Phone and email — every place marked data-cfg="phone" / data-cfg="email"
-  // (top bar, the Contact Us card, footers). Text lives in a child span
-  // (.topbar-text or .hg-contact-text) when the link also has an icon
-  // inside it, so only that span's text is replaced — the icon stays put.
+  // Phone and email — every place marked data-cfg="phone" / data-cfg="email" (top bar, contact section, footers)
   document.querySelectorAll("[data-cfg='phone']").forEach(function (a) {
-    var t = a.querySelector(".topbar-text, .hg-contact-text") || a;
+    var t = a.querySelector(".topbar-text") || a;
     t.textContent = CONFIG.phone;
     a.href = "tel:" + CONFIG.phoneTel;
   });
   document.querySelectorAll("[data-cfg='email']").forEach(function (a) {
-    var t = a.querySelector(".topbar-text, .hg-contact-text") || a;
+    var t = a.querySelector(".topbar-text") || a;
     t.textContent = CONFIG.email;
     a.href = "mailto:" + CONFIG.email;
   });
@@ -1303,6 +1297,12 @@ function initMassTimes() {
     if (/pm/i.test(m[3])) h += 12;
     return h * 60 + (+m[2] || 0);
   }
+  function dayPrefix(dk) {
+    if (DAY_NAME[dk]) return DAY_NAME[dk];
+    if (dk === "everyday" || dk === "daily") return "Daily";
+    if (dk === "weekdays" || dk === "weekday") return "Weekday";
+    return "";
+  }
   function classDay(dk) {
     if (DAY_NAME[dk]) return "Every " + DAY_NAME[dk];
     if (dk === "everyday" || dk === "daily") return "Every day";
@@ -1342,38 +1342,21 @@ function initMassTimes() {
       data.items.forEach(function (x) {
         var row = document.createElement("div");
         row.className = "hg-row";
-
-        // Label + optional italic sub-line (e.g. "Holy Mass" / "in Malayalam") —
-        // matches the hand-written fallback markup already in index.html.
         var lab = document.createElement("span");
         lab.className = "hg-row-label";
-        lab.appendChild(document.createTextNode(x.label));
+        var pre = dayPrefix(x.day);
+        lab.appendChild(document.createTextNode((pre ? pre + " " : "") + x.label));
         if (x.note) {
           lab.appendChild(document.createElement("br"));
           var em = document.createElement("em");
-          em.textContent = x.note.replace(/^\(\s*|\s*\)$/g, "");
+          em.textContent = "(" + x.note.replace(/^\(\s*|\s*\)$/g, "") + ")";
           lab.appendChild(em);
-        }
-
-        // Frequency badge ("EVERY SUNDAY" etc., uppercased via CSS) stacked
-        // above the time — the Day column drives this badge instead of
-        // prefixing the label, again matching the fallback markup.
-        var wrap = document.createElement("span");
-        wrap.className = "hg-row-time-wrap";
-        var freqText = classDay(x.day);
-        if (freqText) {
-          var freq = document.createElement("span");
-          freq.className = "hg-row-freq";
-          freq.textContent = freqText;
-          wrap.appendChild(freq);
         }
         var tm = document.createElement("span");
         tm.className = "hg-row-time";
         tm.textContent = x.time;
-        wrap.appendChild(tm);
-
         row.appendChild(lab);
-        row.appendChild(wrap);
+        row.appendChild(tm);
         box.appendChild(row);
       });
     }

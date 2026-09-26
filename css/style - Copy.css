@@ -199,45 +199,29 @@ address { font-style: normal; }
   height: 100%;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   gap: 1rem;
 }
 
-/* Social icons, left side */
-.topbar-social {
+.topbar-item {
   display: flex;
   align-items: center;
-  gap: .9rem;
-}
-
-.topbar-social-link {
-  display: flex;
+  gap: .4rem;
   color: rgba(255,255,255,.8);
+  text-decoration: none;
+  font-size: .75rem;
+  font-family: var(--font-body);
   transition: color var(--transition);
 }
-.topbar-social-link:hover { color: var(--gold-light); }
-.topbar-social-link svg { width: 15px; height: 15px; }
 
-/* Donate button + hamburger, right side */
-.topbar-right {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
+.topbar-item:hover { color: var(--gold-light); }
 
-.topbar-donate-btn {
-  background: var(--gold);
-  color: var(--navy-dark);
-  font-family: var(--font-body);
-  font-size: .75rem;
-  font-weight: 800;
-  letter-spacing: .03em;
-  text-transform: uppercase;
-  padding: .3rem .9rem;
-  border-radius: 20px;
-  transition: background var(--transition);
+.topbar-icon { font-size: .8rem; }
+
+.topbar-divider {
+  color: rgba(201,164,40,.4);
+  font-size: .9rem;
 }
-.topbar-donate-btn:hover { background: var(--gold-light); }
 
 .topbar-hamburger {
   margin-left: auto;
@@ -457,236 +441,46 @@ body.sticky-visible .hero-nav-drawer { top: calc(var(--topbar-height) + 62px); }
 
 
 /* ══════════════════════════════════════════
-   HERO — full-width photo, aspect-ratio locked
-   to the source image's own proportions (2752×1147)
-   so the logo and the entire photo (Mary, angels,
-   the people below) are always fully visible —
-   scaled proportionally, never cropped, never
-   stretched — at any screen width.
+   HOME GRID — 5-row layout  (65 : 35 columns)
+   col-1 rows 1-2 : Church photo
+   col-2 row 1    : Mass Schedule
+   col-2 row 2    : Announcements
+   col-2 row 3    : Parish Posters carousel
+   col-1 row 3    : About Parish
+   col-2 row 4    : Upcoming Events
+   Left  (65) : photo → clergy → about → calendar
+   Right (35) : schedule → announce → posters → events → donate
 ══════════════════════════════════════════ */
-.hero-section {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 2752 / 1147;
+.home-grid {
+  display: flex;
+  align-items: stretch;
   margin-top: var(--topbar-height);
   border-top: 3px solid var(--gold);
-  background:
-    url('../images/hero-bg.jpg') center/contain no-repeat,
-    linear-gradient(160deg, var(--navy-dark) 0%, var(--navy-light) 100%);
-  overflow: hidden;
 }
 
-/* ══════════════════════════════════════════
-   TAGLINE BAND — full width, directly under the hero
-══════════════════════════════════════════ */
-.hg-tagline {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: .65rem;
-  background: var(--navy);
-  color: #fff;
-  padding: .85rem 1.5rem;
-  text-align: center;
-}
-
-.hg-tagline-icon {
-  width: 26px;
-  height: auto;
-  flex-shrink: 0;
-}
-
-.hg-tagline-text {
-  font-family: var(--font-body);
-  font-size: clamp(.78rem, 1.35vw, 1rem);
-  font-weight: 400;
-  letter-spacing: .01em;
-  white-space: nowrap;
-  margin: 0;
-}
-
-/* ══════════════════════════════════════════
-   QUICK INFO ROW — Mass Schedule, the three
-   join actions, and Contact Us, all in one glance
-══════════════════════════════════════════ */
-.quick-info-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  align-items: stretch;
-  gap: 1.25rem;
-  padding: 1.75rem 1.5rem;
-  background: var(--cream);
-  border-bottom: 3px solid var(--gold);
-}
-
-/* Gold pill card-header, shared by all three cards */
-.qir-pill {
-  display: inline-block;
-  background: var(--gold-light);
-  color: var(--navy-dark);
-  font-family: var(--font-body);
-  font-weight: 800;
-  font-size: .95rem;
-  letter-spacing: .02em;
-  padding: .5rem 1.25rem;
-  border-radius: 8px;
-  text-align: center;
-}
-.qir-pill--full { display: block; width: 100%; box-sizing: border-box; }
-
-/* Shared card look for the quick-info row. Add class="qir-card" to any
-   new card's outer <div> to pick up this white/gold-border style —
-   no CSS edits needed when adding or removing a card; the grid above
-   (.quick-info-row, auto-fit columns) reflows on its own. */
-.quick-info-row .qir-card {
-  display: flex;
-  flex-direction: column;
-  background: var(--white);
-  border: 2px solid var(--gold);
-  border-radius: 10px;
-  padding: 1.1rem;
-}
-
-/* Short one-liner that fills leftover space at the bottom of a card
-   so Join Us / Donate match the Mass Schedule card's height */
-.qir-footnote {
-  margin: auto 0 0;
-  padding-top: .9rem;
-  font-size: .85rem;
-  font-style: italic;
-  text-align: center;
-  color: var(--text-muted);
-}
-
-/* Mass Schedule — pill above, plain rows below (no nested border) */
-.quick-info-row .hg-schedule-box {
-  border: none;
-  border-radius: 0;
-  margin-top: 1rem;
-  overflow: visible;
-}
-
-/* Join Us card — pill above, a row of three plain icon cells below */
-.hg-join-cells {
-  display: flex;
-  margin-top: 1rem;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.quick-btn {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: .5rem;
-  text-align: center;
-  padding: 1.1rem .6rem;
-  background: var(--cream);
-  color: var(--text);
-  text-decoration: none;
-  border-right: 1px solid var(--cream-dark);
-  transition: background var(--transition), transform var(--transition);
-}
-.hg-join-cells .quick-btn:last-child { border-right: none; }
-.quick-btn[hidden] { display: none; }
-.quick-btn:hover { background: var(--cream-dark); }
-.quick-btn:focus-visible { outline: 3px solid var(--navy); outline-offset: -3px; }
-
-.quick-btn-icon { font-size: 1.7rem; line-height: 1; color: var(--navy-dark); }
-.quick-btn-icon .hg-wa-icon { width: 1.7rem; height: 1.7rem; color: #25d366; }
-.quick-btn-label {
-  font-family: var(--font-body);
-  font-size: .78rem;
-  font-weight: 800;
-  letter-spacing: .02em;
-  text-transform: uppercase;
-  line-height: 1.35;
-  color: var(--navy-dark);
-}
-
-/* Donate card — pill above, QR left / text right */
-.hg-donate-row {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-top: 1rem;
-}
-
-.hg-donate-qr {
-  width: 130px;
-  height: 130px;
-  object-fit: contain;
-  border-radius: 6px;
-  flex-shrink: 0;
-}
-
-.hg-donate-text-block {
-  min-width: 0;
-}
-.hg-donate-text-block p {
-  font-size: .88rem;
-  color: var(--text);
-  line-height: 1.5;
-  margin: 0 0 .35rem;
-  overflow-wrap: break-word;
-}
-.hg-donate-text-block p:last-child { margin-bottom: 0; }
-
-/* Contact Us card — pill above, icon + tap-to-act rows below
-   (address opens Google Maps directions, phone calls, email opens mail app) */
-.hg-contact-rows {
-  margin-top: 1rem;
-}
-
-.hg-contact-row {
-  display: flex;
-  align-items: center;
-  gap: .75rem;
-  padding: .65rem .3rem;
-  border-bottom: 1px solid var(--cream-dark);
-  color: var(--text);
-  text-decoration: none;
-  transition: color var(--transition);
-}
-.hg-contact-row:last-child { border-bottom: none; }
-.hg-contact-row:hover { color: var(--gold-dark); }
-
-.hg-contact-icon {
-  font-size: 1.1rem;
-  flex-shrink: 0;
-  width: 1.4rem;
-  text-align: center;
-}
-
-.hg-contact-text {
-  font-size: .88rem;
-  line-height: 1.4;
-  overflow-wrap: break-word;
-}
-
-/* ══════════════════════════════════════════
-   LOWER GRID — Clergy & Calendar (left)
-   Announcements & Parish Notices (right)
-══════════════════════════════════════════ */
-.lower-grid {
-  display: flex;
-  align-items: stretch;
-}
-
-.lg-left {
+.hg-left {
   flex: 65;
   display: flex;
   flex-direction: column;
 }
 
-.lg-right {
+.hg-right {
   flex: 35;
   display: flex;
   flex-direction: column;
   border-left: 4px solid var(--gold);
 }
+
+/* ── Left col, top — Church photo ── */
+.hg-photo {
+  min-height: calc(40vh + 65px);
+  position: relative;
+  background:
+    url('../images/hero-bg.jpg') center/cover no-repeat,
+    linear-gradient(160deg, var(--navy-dark) 0%, var(--navy-light) 100%);
+  transition: background-size var(--transition);
+}
+
 
 /* ── Photo — bottom welcome overlay ── */
 .hg-photo-overlay {
@@ -747,15 +541,6 @@ body.sticky-visible .hero-nav-drawer { top: calc(var(--topbar-height) + 62px); }
   border-top: 1px solid rgba(201,164,40,.25);
   padding: 1.5rem 1.75rem;
 }
-
-/* ── Right col — Donate (always shown, so this column is
-   never fully empty when there are no announcements/posters) ── */
-.hg-donate-side {
-  background: var(--tint-announce);
-  border-top: 1px solid rgba(201,164,40,.25);
-  padding: 1.75rem 1.75rem 2rem;
-}
-.hg-donate-side .hg-donate-row { margin-top: 1.25rem; }
 
 /* Carousel */
 .poster-carousel {
@@ -1276,7 +1061,56 @@ body.sticky-visible .hero-nav-drawer { top: calc(var(--topbar-height) + 62px); }
   .staff-card-compact .staff-role { font-size: .66rem; }
 }
 
-/* Donate card styling now lives with the quick-info-row rules above (.hg-donate-row, .hg-donate-qr, .hg-donate-text-block) */
+/* ── Right col — Support Our Parish ── */
+.hg-donate {
+  background: var(--white);
+  border-top: 1px solid rgba(201,164,40,.25);
+  padding: 2rem 1.75rem;
+}
+
+.hg-donate-box {
+  border: 2px solid var(--gold);
+  border-radius: 10px;
+  background: linear-gradient(160deg, #faf7f2 0%, #f0e8d8 100%);
+  padding: 1.5rem 1.25rem;
+  text-align: center;
+}
+
+.hg-donate-text {
+  font-size: .9rem;
+  color: var(--text);
+  margin-bottom: 1.1rem;
+  line-height: 1.6;
+}
+
+.hg-donate-qr-wrap {
+  margin-bottom: 1rem;
+}
+
+.hg-donate-qr {
+  display: block;
+  margin: 0 auto .75rem;
+  width: 95%;
+  max-width: 280px;
+  height: auto;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(201,164,40,.25);
+}
+
+.hg-donate-qr-caption {
+  font-size: .8rem;
+  color: var(--text-light);
+}
+
+.hg-donate-note {
+  font-size: .8rem;
+  color: var(--text-light);
+  line-height: 1.6;
+  border-top: 1px solid rgba(201,164,40,.35);
+  padding-top: .85rem;
+  margin-top: .85rem;
+}
 
 /* Standalone donate section — shown on mobile only */
 .donate-mobile { display: none; }
@@ -1343,22 +1177,6 @@ body.sticky-visible .hero-nav-drawer { top: calc(var(--topbar-height) + 62px); }
   white-space: nowrap;
 }
 
-.hg-row-time-wrap {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: .15rem;
-  flex-shrink: 0;
-}
-
-.hg-row-freq {
-  font-size: .7rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: .04em;
-  color: var(--text-muted);
-}
-
 /* ── Join Us (WhatsApp group + parish registration) ── */
 .hg-wa-icon {
   width: 1rem;
@@ -1367,10 +1185,68 @@ body.sticky-visible .hero-nav-drawer { top: calc(var(--topbar-height) + 62px); }
   flex-shrink: 0;
 }
 
-/* Join Us buttons are now the .quick-btn cards in the quick-info row (see above) */
+.hg-join {
+  background: #fff;
+  border-top: 1px solid rgba(201,164,40,.25);
+  padding: 1.5rem 1.75rem 1.75rem;
+  text-align: center;
+}
+.hg-join .hg-section-title { margin-bottom: .75rem; }
 
+/* Inner box: cream fill + golden border (same look as the Donate box) */
+.hg-join-box {
+  background: var(--tint-schedule);
+  border: 2px solid var(--gold);
+  border-radius: 10px;
+  padding: 1.3rem 1.25rem 1.4rem;
+}
+
+.hg-join-text {
+  font-size: .9rem;
+  line-height: 1.55;
+  color: var(--text-muted);
+  margin: 0 0 1.1rem;
+}
+
+.hg-join-actions {
+  display: flex;
+  flex-direction: column;
+  gap: .7rem;
+}
+
+.join-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .55rem;
+  padding: .8rem 1.1rem;
+  border-radius: var(--radius);
+  border: 2px solid var(--gold);
+  font-family: var(--font-body);
+  font-size: .88rem;
+  font-weight: 800;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  text-decoration: none;
+  line-height: 1.2;
+  transition: background var(--transition), color var(--transition), border-color var(--transition), transform var(--transition);
+}
+.join-btn[hidden] { display: none; }
 /* A button switched off from the Settings sheet (empty link) — e.g. the Register Your Child button on the Religious Education page */
 [data-cfg-link][hidden] { display: none !important; }
+.join-btn:hover { transform: translateY(-1px); }
+.join-btn:focus-visible { outline: 3px solid var(--navy); outline-offset: 2px; }
+
+.join-btn--primary { background: var(--gold); color: var(--navy-dark); }
+.join-btn--primary:hover { background: var(--gold-light); border-color: var(--gold-light); color: var(--navy-dark); }
+
+.join-btn--ccd { background: var(--navy); color: #fff; border-color: var(--navy); }
+.join-btn--ccd:hover { background: var(--navy-dark); border-color: var(--gold); color: #fff; }
+
+.join-btn--wa { background: #1aab52; color: #fff; border-color: #1aab52; }
+.join-btn--wa .hg-wa-icon { width: 1.25rem; height: 1.25rem; color: #fff; }
+.join-btn--wa:hover { background: #148f43; border-color: #148f43; color: #fff; }
+.join-btn--wa:hover .hg-wa-icon { color: #fff; }
 
 /* ── Announcements: highlight cards (inside hg-announce cell) ── */
 .hg-announce[hidden] { display: none; }
@@ -2060,6 +1936,97 @@ body.ann-modal-open { overflow: hidden; }
 }
 
 
+/* ══════════════════════════════════════════
+   CONTACT
+══════════════════════════════════════════ */
+.contact-layout {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 3rem;
+  align-items: start;
+}
+
+.contact-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.contact-item {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.contact-icon {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+  width: 2rem;
+  text-align: center;
+  margin-top: .1rem;
+}
+
+.contact-item h3 {
+  font-size: 1rem;
+  margin-bottom: .3rem;
+}
+
+.contact-item p {
+  color: var(--text-muted);
+  font-size: .925rem;
+}
+
+.contact-item a { color: var(--gold-dark); }
+
+.contact-social-links {
+  display: flex;
+  gap: .75rem;
+  flex-wrap: wrap;
+  margin-top: .5rem;
+}
+
+.contact-social-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .5rem 1rem;
+  background: var(--navy);
+  color: var(--white);
+  border-radius: 6px;
+  font-size: .82rem;
+  font-weight: 700;
+  transition: background var(--transition);
+}
+
+.contact-social-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.contact-social-btn:hover { background: var(--navy-light); color: var(--white); }
+
+.contact-map { border-radius: 10px; overflow: hidden; box-shadow: var(--shadow-md); }
+
+.map-wrap { width: 100%; height: 400px; border-radius: 10px; overflow: hidden; }
+
+.map-wrap iframe { width: 100%; height: 100%; border: none; }
+
+.map-placeholder {
+  width: 100%;
+  height: 400px;
+  background: var(--cream-dark);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  color: var(--text-muted);
+  font-size: .9rem;
+  text-align: center;
+  padding: 1rem;
+  border-radius: 10px;
+}
+
 
 /* ══════════════════════════════════════════
    FOOTER
@@ -2245,27 +2212,7 @@ body.subpage {
   background: var(--navy-dark);
 }
 
-/* Blurred, zoomed copy of the same photo, filling the full hero behind
-   the sharp (object-fit: contain) image below — so letterboxing shows a
-   soft blur of the photo itself instead of the flat navy background.
-   Photo source comes from the --pf-bg custom property (inline style, set
-   in the markup for the static Religious Education hero, or by
-   setHeroPhoto() in js/media.js for the dynamic Media page hero); when
-   unset, this paints nothing and the plain navy shows through as before. */
-.page-hero--photo::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: var(--pf-bg, none);
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  filter: blur(24px) brightness(0.55) saturate(1.15);
-  transform: scale(1.15);
-  z-index: 0;
-  opacity: 1;   /* override .page-hero::before's opacity: 0.12 (that rule is
-                   for the plain hero's faint texture, not this backdrop) */
-}
+.page-hero--photo::before { display: none; }   /* drop the faint texture used on plain heroes */
 
 .page-hero--photo::after {                      /* dark fade: text at the bottom, breadcrumb at the top */
   content: '';
@@ -2282,14 +2229,9 @@ body.subpage {
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: contain;
-  object-position: center;
-  z-index: 1;
+  object-fit: cover;
+  object-position: center 30%;
 }
-/* The global `img { display: block }` reset (near the top of this file)
-   otherwise overrides the browser's default [hidden] behavior — needed on
-   media.html, where this image starts hidden until JS finds a photo. */
-.page-hero-img[hidden] { display: none; }
 
 .page-hero--photo .page-hero-top {
   position: absolute;
@@ -2818,17 +2760,20 @@ body.subpage {
    RESPONSIVE — TABLET (≤900px)
 ══════════════════════════════════════════ */
 @media (max-width: 900px) {
-  /* Lower grid — slightly wider right column on tablet */
-  .lg-left  { flex: 60; }
-  .lg-right { flex: 40; }
+  /* Home grid — slightly wider right column on tablet */
+  .hg-left  { flex: 60; }
+  .hg-right { flex: 40; }
   .hero-nav-drawer { width: 60%; }
   .hg-clergy { padding: 1.4rem 1.5rem 1.6rem; }
-  .quick-info-row { grid-template-columns: 1fr; }
-  .hg-tagline-text { white-space: normal; }
 
   .about-layout {
     grid-template-columns: 1fr;
     gap: 2.5rem;
+  }
+
+  .contact-layout {
+    grid-template-columns: 1fr;
+    gap: 2rem;
   }
 
   .footer-grid {
@@ -2844,9 +2789,12 @@ body.subpage {
 @media (max-width: 680px) {
   :root { --topbar-height: 36px; }
 
-  /* Topbar — tighter gap on mobile */
-  .topbar-inner { padding: 0 1rem; }
-  .topbar-social { gap: .75rem; }
+  /* Topbar — icons only on mobile */
+  .topbar-text { display: none; }
+  .topbar-divider { display: none; }
+  .topbar-inner { gap: 1.75rem; }
+  .topbar-item { font-size: 1rem; }
+  .topbar-icon { font-size: 1.1rem; }
 
   /* Sticky bar — slim on scroll, expanded on hamburger tap */
   .sticky-nav-links { display: none; }
@@ -2883,18 +2831,19 @@ body.subpage {
   .hero-name { font-size: .85rem; }
   .hero-name-sub { font-size: .62rem; }
 
-  /* Tagline — allow wrap to two lines instead of forcing one on narrow phones */
-  .hg-tagline-text { white-space: normal; }
+  /* Home grid — single column on mobile, reorder with display:contents + order */
+  .home-grid   { flex-direction: column; }
+  .hg-left, .hg-right { display: contents; }
 
-  /* Quick info row — single column, Mass Schedule first (already first in source order) */
-  .quick-info-row { grid-template-columns: 1fr; padding: 1.5rem 1.25rem; }
-
-  /* Lower grid — single column: Clergy + Calendar, then Announcements + Posters */
-  .lower-grid { flex-direction: column; }
-  .lg-left, .lg-right { flex: 0 0 auto; }
-  .lg-right { border-left: none; border-top: 4px solid var(--gold); }
-  .hg-clergy { border-top: 1px solid var(--cream-dark); padding: 1.4rem 1.1rem 1.5rem; }
-  .hg-events { border-top: 4px solid var(--gold); }
+  .hg-photo    { order: 1; min-height: 55vw; flex: 0 0 auto; }
+  .hg-schedule { order: 2; border-top: 4px solid var(--gold); flex: 0 0 auto; }
+  .hg-join     { order: 3; flex: 0 0 auto; padding: 1.5rem 1.25rem 1.6rem; }
+  .hg-announce { order: 4; flex: 0 0 auto; }
+  .hg-posters  { order: 5; flex: 0 0 auto; }
+  .hg-clergy   { order: 6; flex: 0 0 auto; border-top: 1px solid var(--cream-dark); padding: 1.4rem 1.1rem 1.5rem; }
+  .hg-events   { order: 7; flex: 0 0 auto; border-top: 4px solid var(--gold); }
+  .hg-donate   { display: none; }
+  .donate-mobile { display: block; }
 
   .section { padding: 3.5rem 0; }
 
@@ -2925,6 +2874,9 @@ body.subpage {
 
   /* Staff — 2 columns on mobile */
   .staff-grid { grid-template-columns: repeat(2, 1fr); }
+
+  /* Contact social */
+  .contact-social-links { gap: .5rem; }
 }
 
 @media (max-width: 680px) {
@@ -3036,66 +2988,12 @@ a:hover > .pl-thumb .pl-play { transform: scale(1.1); background: var(--gold-lig
 .pl-video-row .pl-video-title { font-size: .95rem; color: #fff; margin: 0 0 .3rem; }
 .pl-video-row .pl-video-date  { color: var(--gold-light); font-size: .7rem; }
 
-/* ── Home: photo slideshow (full-width, auto-advancing) ── */
-.pl-slideshow {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  border-radius: 12px;
-  overflow: hidden;
-  background: var(--navy);
-  box-shadow: var(--shadow-sm);
+/* ── Home: photo mosaic ── */
+.pl-mosaic {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: .7rem;
 }
-.pl-slide {
-  position: absolute; inset: 0;
-  width: 100%; height: 100%;
-  padding: 0; margin: 0; border: 0;
-  cursor: pointer;
-  opacity: 0;
-  transition: opacity .8s ease;
-  z-index: 1;
-}
-.pl-slide.active { opacity: 1; z-index: 2; }
-.pl-slide img {
-  width: 100%; height: 100%;
-  object-fit: contain;
-  display: block;
-  position: relative;
-  z-index: 1;
-}
-.pl-slide:focus-visible { outline: 3px solid var(--gold); outline-offset: -3px; z-index: 3; }
-.pl-slide-dots {
-  position: absolute;
-  bottom: .9rem; left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: .4rem;
-  z-index: 3;
-}
-.pl-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.45); }
-.pl-dot.active { background: #fff; }
-
-/* Blurred, zoomed copy of the same photo, filling the slide/tile behind
-   the sharp (object-fit: contain) image — same treatment as the photo
-   hero above (.page-hero--photo::before). Photo source comes from the
-   --pf-bg custom property, set inline by js/media.js on each slide/tile/
-   cover as it's built; when unset, this paints nothing. */
-.pl-slide::before,
-.pl-tile::before,
-.album-cover::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: var(--pf-bg, none);
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  filter: blur(20px) brightness(0.6) saturate(1.15);
-  transform: scale(1.15);
-  z-index: 0;
-}
-
-/* ── Shared photo tile (media.html album grid) ── */
 .pl-tile {
   position: relative;
   display: block;
@@ -3109,15 +3007,34 @@ a:hover > .pl-thumb .pl-play { transform: scale(1.1); background: var(--gold-lig
   cursor: pointer;
   text-decoration: none;
 }
+.pl-tile--big { grid-column: span 2; grid-row: span 2; aspect-ratio: auto; }
+.pl-mosaic--few { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
 .pl-tile img {
   position: absolute; inset: 0;
   width: 100%; height: 100%;
-  object-fit: contain;
-  z-index: 1;
+  object-fit: cover;
   transition: transform .45s ease;
 }
 .pl-tile:hover img, .pl-tile:focus-visible img { transform: scale(1.06); }
 .pl-tile:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+.pl-tile-more {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  background: rgba(17,27,48,.66);
+  color: #fff;
+  font-family: var(--font-heading);
+  font-size: 1.9rem;
+  font-weight: 700;
+}
+.pl-tile-more small {
+  font-family: var(--font-body);
+  font-size: .7rem;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--gold-light);
+}
 
 /* ── media.html ── */
 .media-note {
@@ -3182,8 +3099,7 @@ a:hover > .pl-thumb .pl-play { transform: scale(1.1); background: var(--gold-lig
 .album-cover img {
   position: absolute; inset: 0;
   width: 100%; height: 100%;
-  object-fit: contain;
-  z-index: 1;
+  object-fit: cover;
   transition: transform .45s ease;
 }
 .album-card:hover .album-cover img { transform: scale(1.05); }
@@ -3293,7 +3209,8 @@ a:hover > .pl-thumb .pl-play { transform: scale(1.1); background: var(--gold-lig
   .pl-video-layout { grid-template-columns: 1fr; }
 }
 @media (max-width: 680px) {
-  .pl-slideshow { aspect-ratio: 4 / 3; }
+  .pl-mosaic { grid-template-columns: repeat(2, 1fr); }
+  .pl-tile--big { grid-column: span 2; grid-row: auto; aspect-ratio: 16 / 10; }
   .pl-video-card .pl-video-title { font-size: 1.12rem; }
   .pl-video-row { grid-template-columns: 38% 1fr; }
   .album-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; }

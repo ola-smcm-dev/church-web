@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Religious Education — CCD program, schedule, and faith formation at Our Lady Of Assumption Syro Malabar Catholic Mission, Fairfield CT.">
+  <meta name="description" content="Videos and photos from Our Lady Of Assumption Syro Malabar Catholic Mission in Fairfield, CT — Holy Qurbana recordings, feasts and parish celebrations.">
   <meta name="theme-color" content="#1a2744">
   <!-- Favicon -->
   <link rel="icon" href="images/favicon.ico" sizes="48x48">
   <link rel="icon" type="image/png" href="images/favicon-192.png" sizes="192x192">
   <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
-  <title>Religious Education — Our Lady Of Assumption</title>
+  <title>Videos &amp; Photos — Our Lady Of Assumption</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
@@ -36,8 +36,8 @@
       <div class="topbar-right">
         <a href="index.html#donate" class="topbar-donate-btn">Donate</a>
         <button class="topbar-hamburger" id="topbarHamburger" aria-label="Open navigation menu" aria-expanded="false">
-        <span></span><span></span><span></span>
-      </button>
+          <span></span><span></span><span></span>
+        </button>
       </div>
     </div>
   </div>
@@ -53,7 +53,7 @@
         </div>
       </a>
       <ul class="sticky-nav-links" role="list">
-        <li><a href="religious-education.html" class="sticky-nav-donate">Religious Education</a></li>
+        <li><a href="religious-education.html">Religious Education</a></li>
         <li><a href="media.html">Media</a></li>
         <li><a href="index.html#donate" class="sticky-nav-donate">Donate</a></li>
         <li><a href="index.html#contact">Contact</a></li>
@@ -73,123 +73,62 @@
 
   <main id="main-content">
 
-    <!-- PAGE HERO — photo with text overlay -->
-    <div class="page-hero page-hero--photo" style="--pf-bg:url('images/ccd-teachers.jpeg')">
-      <img class="page-hero-img" src="images/ccd-teachers.jpeg" width="1600" height="900"
-           alt="Our CCD teachers gathered in the church sanctuary">
+    <!-- PAGE HERO — a random photo from the latest album, filled in by js/media.js
+         (falls back to a plain navy hero, same as before, until a photo loads) -->
+    <div class="page-hero page-hero--photo">
+      <img class="page-hero-img" id="mediaHeroImg" alt="" hidden>
       <div class="page-hero-top container">
-        <p class="page-breadcrumb"><a href="index.html">Home</a> &rsaquo; Religious Education</p>
+        <p class="page-breadcrumb"><a href="index.html">Home</a> &rsaquo; Videos &amp; Photos</p>
       </div>
       <div class="page-hero-inner container">
         <span class="ornament ornament-light" aria-hidden="true">✦ ✦ ✦</span>
-        <h1>Religious Education</h1>
-        <p class="page-hero-sub">Forming young hearts in faith, tradition, and love</p>
-        <a href="https://docs.google.com/forms/d/e/1FAIpQLSf0CmzCS2RXgI70863tB-Y9HohepDLqB0kAj3N6m1TzhTF5Gg/viewform" data-cfg-link="ccd" class="btn btn-primary page-hero-cta" target="_blank" rel="noopener noreferrer">Register Your Child</a>
+        <h1>Videos &amp; Photos</h1>
+        <p class="page-hero-sub">Moments of worship, fellowship and celebration in our parish family</p>
       </div>
     </div>
 
-    <!-- ABOUT CCD -->
-    <section class="section section-white">
+    <!-- VIDEOS (YouTube playlist) -->
+    <section class="section section-white" id="videos" aria-labelledby="mv-heading">
       <div class="container">
-
         <div class="section-header">
           <p class="ornament">✦ ✦ ✦</p>
-          <h2>Our CCD Program</h2>
-          <p class="section-subtitle">Confraternity of Christian Doctrine — Faith formation rooted in the Syro Malabar tradition</p>
+          <h2 id="mv-heading">Videos</h2>
+          <p class="section-subtitle">Holy Qurbana recordings and parish highlights from our YouTube channel</p>
         </div>
 
-        <div class="sp-card">
-          <h3>About the Program</h3>
-          <p>
-            Our CCD program is dedicated to nurturing the faith of our children and youth within the rich tradition of the Syro Malabar Catholic Church. Guided by the teachings of Saint Thomas the Apostle and the Church's ancient liturgical heritage, we help young parishioners develop a deep and lasting relationship with God.
-          </p>
-          <p style="margin-top:.75rem;">
-            Classes are held every Sunday before the Holy Qurbana, giving families a seamless way to combine faith formation with weekly worship. Our dedicated teachers bring warmth, knowledge, and devotion to every class.
-          </p>
+        <div class="media-video-grid" id="mediaVideoGrid" aria-live="polite">
+          <p class="media-note">Loading videos&hellip;</p>
         </div>
 
-        <!-- SCHEDULE -->
-        <div class="section-header" style="margin-top:3rem;">
+        <p class="pl-more">
+          <a class="btn btn-outline" id="ytChannelBtn" href="https://www.youtube.com/@OurLadyOfAssumptionSyroMalabar" target="_blank" rel="noopener noreferrer">Visit our YouTube channel</a>
+        </p>
+      </div>
+    </section>
+
+    <!-- PHOTOS (Google Drive folder → albums) -->
+    <section class="section section-cream" id="photos" aria-labelledby="mp-heading">
+      <div class="container">
+        <div class="section-header">
           <p class="ornament">✦ ✦ ✦</p>
-          <h2>Class Schedule</h2>
+          <h2 id="mp-heading">Photo Albums</h2>
+          <p class="section-subtitle">Memories from our celebrations, feasts and community gatherings</p>
         </div>
 
-        <div class="sp-card">
-          <table class="sp-schedule" aria-label="CCD class schedule">
-            <thead>
-              <tr>
-                <th>Day</th>
-                <th>Time</th>
-                <th>Location</th>
-                <th>Notes</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td data-label="Day" data-cfg="reDay">Every Sunday</td>
-                <td data-label="Time" data-cfg="reTime">11:30 AM – 12:30 PM</td>
-                <td data-label="Location">838 Kings Hwy E, Fairfield, CT</td>
-                <td data-label="Notes">Immediately before Sunday Holy Mass</td>
-              </tr>
-            </tbody>
-          </table>
-          <p style="margin-top:1rem; font-size:.85rem; color:var(--text-muted);">
-            ✝ &nbsp;Classes follow the school year calendar. Please contact the parish for holiday schedule adjustments.
-          </p>
+        <div class="album-grid" id="albumGrid" aria-live="polite">
+          <p class="media-note">Loading photos&hellip;</p>
         </div>
 
-        <!-- PROGRAMS -->
-        <div class="section-header" style="margin-top:3rem;">
-          <p class="ornament">✦ ✦ ✦</p>
-          <h2>Programs Offered</h2>
-        </div>
-
-        <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); gap:1.25rem; margin-bottom:2rem;">
-          <div class="sp-card" style="margin-bottom:0;">
-            <h3>✝ &nbsp;Children's Faith Formation</h3>
-            <p>Age-appropriate lessons introducing children to the life of Christ, the sacraments, and the Syro Malabar liturgical tradition. Includes preparation for First Holy Communion.</p>
+        <div id="albumDetail" hidden>
+          <div class="album-toolbar">
+            <button type="button" class="btn btn-outline" id="albumBack">&larr; All albums</button>
+            <div>
+              <h3 id="albumTitle"></h3>
+              <p class="album-count" id="albumCount"></p>
+            </div>
           </div>
-          <div class="sp-card" style="margin-bottom:0;">
-            <h3>✝ &nbsp;Youth Confirmation Prep</h3>
-            <p>A deeper journey into the Catholic faith for older youth, preparing them to receive the Sacrament of Confirmation and embrace their faith as young adults.</p>
-          </div>
-          <div class="sp-card" style="margin-bottom:0;">
-            <h3>✝ &nbsp;Bible &amp; Liturgy Studies</h3>
-            <p>Scripture readings, liturgical seasons, and the meaning behind the Holy Qurbana — helping students connect worship to everyday life.</p>
-          </div>
+          <div class="photo-grid" id="photoGrid"></div>
         </div>
-
-        <!-- DIRECTOR -->
-        <div class="section-header" style="margin-top:3rem;">
-          <p class="ornament">✦ ✦ ✦</p>
-          <h2>Program Director</h2>
-        </div>
-
-        <div class="sp-card sp-director" style="display:flex; gap:1.5rem; align-items:flex-start; flex-wrap:wrap;">
-          <img src="images/pavan-antony.jpg" alt="Mr. Pavan Antony" class="sp-priest-photo" style="flex-shrink:0; margin:0;"
-            onerror="this.outerHTML='<div class=\'sp-priest-placeholder\' style=\'flex-shrink:0; margin:0;\'>✝</div>'">
-          <div style="flex:1 1 320px; min-width:0;">
-            <h3 style="margin-bottom:.25rem;">Mr. Pavan Antony</h3>
-            <p style="color:var(--gold-dark); font-weight:700; font-size:.85rem; margin-bottom:.5rem;">Religious Education Director</p>
-            <p>Pavan leads our faith formation programs for children, youth, and adults. With a passion for the Syro Malabar tradition, he designs a curriculum that is both engaging and deeply rooted in the Church's heritage. For inquiries about enrollment or the program, please reach out to the parish.</p>
-          </div>
-        </div>
-
-        <!-- PHOTO GALLERY — live photos from the Faith Formation Drive
-             folder, via js/media.js (initReligiousEducation). Same
-             auto-advancing slideshow as the home page's Parish Life
-             section. Hidden entirely until that album has photos. -->
-        <div id="rePhotos" hidden>
-          <div class="section-header" style="margin-top:3rem;">
-            <p class="ornament">✦ ✦ ✦</p>
-            <h2>Photo Gallery</h2>
-            <p class="section-subtitle">Moments from our faith formation journey</p>
-          </div>
-
-          <div class="pl-slideshow" id="reMosaic"></div>
-          <p class="pl-more"><a class="btn btn-primary" href="media.html#photos">All photos &amp; albums &rarr;</a></p>
-        </div>
-
       </div>
     </section>
 

@@ -2,9 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="robots" content="noindex, nofollow">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Church History — The story of Our Lady Of Assumption Syro Malabar Catholic Mission in Fairfield, CT.">
   <meta name="theme-color" content="#1a2744">
+  <!-- Favicon -->
+  <link rel="icon" href="images/favicon.ico" sizes="48x48">
+  <link rel="icon" type="image/png" href="images/favicon-192.png" sizes="192x192">
+  <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
   <title>Our Church History — Our Lady Of Assumption</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,25 +21,25 @@
   <a href="#main-content" class="skip-link">Skip to main content</a>
 
   <!-- TOP UTILITY BAR -->
-  <div class="topbar" role="complementary" aria-label="Contact information">
+  <div class="topbar" role="complementary" aria-label="Social media and donate">
     <div class="topbar-inner">
-      <a class="topbar-item" href="index.html#contact" aria-label="Our address">
-        <span class="topbar-icon" aria-hidden="true">📍</span>
-        <span class="topbar-text">838 Kings Hwy E, Fairfield, CT 06825</span>
-      </a>
-      <span class="topbar-divider" aria-hidden="true">·</span>
-      <a class="topbar-item" href="tel:+12032164859" aria-label="Call us">
-        <span class="topbar-icon" aria-hidden="true">📞</span>
-        <span class="topbar-text">(203) 216-4859</span>
-      </a>
-      <span class="topbar-divider" aria-hidden="true">·</span>
-      <a class="topbar-item" href="mailto:smcc.norwalk@gmail.com" aria-label="Email us">
-        <span class="topbar-icon" aria-hidden="true">✉</span>
-        <span class="topbar-text">smcc.norwalk@gmail.com</span>
-      </a>
-      <button class="topbar-hamburger" id="topbarHamburger" aria-label="Open navigation menu" aria-expanded="false">
-        <span></span><span></span><span></span>
-      </button>
+      <div class="topbar-social" aria-label="Follow us">
+        <a href="#" id="topbarFacebook" class="topbar-social-link" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M24 12.07C24 5.41 18.63 0 12 0S0 5.41 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.04V9.41c0-3.02 1.8-4.7 4.54-4.7 1.31 0 2.68.24 2.68.24v2.97H15.8c-1.49 0-1.95.93-1.95 1.88v2.27h3.32l-.53 3.49h-2.79V24C19.61 23.1 24 18.1 24 12.07z"/></svg>
+        </a>
+        <a href="#" id="topbarInstagram" class="topbar-social-link" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M12 2.2c3.2 0 3.6 0 4.9.1 3.3.2 4.8 1.7 5 5 .1 1.3.1 1.6.1 4.8 0 3.2 0 3.6-.1 4.8-.2 3.3-1.7 4.8-5 5-1.3.1-1.6.1-4.9.1-3.2 0-3.6 0-4.8-.1-3.3-.2-4.8-1.7-5-5C2.1 15.6 2 15.2 2 12c0-3.2 0-3.6.1-4.8.2-3.3 1.7-4.8 5-5 1.2-.1 1.6-.1 4.9-.1zm0-2.2C8.7 0 8.3 0 7.1.1 2.7.3.3 2.7.1 7.1.0 8.3 0 8.7 0 12c0 3.3 0 3.7.1 4.9.2 4.4 2.6 6.8 7 7C8.3 24 8.7 24 12 24c3.3 0 3.7 0 4.9-.1 4.4-.2 6.8-2.6 7-7 .1-1.2.1-1.6.1-4.9 0-3.3 0-3.7-.1-4.9-.2-4.4-2.6-6.8-7-7C15.7 0 15.3 0 12 0zm0 5.8a6.2 6.2 0 100 12.4A6.2 6.2 0 0012 5.8zm0 10.2a4 4 0 110-8 4 4 0 010 8zm6.4-11.8a1.44 1.44 0 100 2.88 1.44 1.44 0 000-2.88z"/></svg>
+        </a>
+        <a href="#" id="topbarYoutube" class="topbar-social-link" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M23.5 6.2a3 3 0 00-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 00.5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 002.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 002.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg>
+        </a>
+      </div>
+      <div class="topbar-right">
+        <a href="index.html#donate" class="topbar-donate-btn">Donate</a>
+        <button class="topbar-hamburger" id="topbarHamburger" aria-label="Open navigation menu" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
     </div>
   </div>
 
@@ -49,12 +54,8 @@
         </div>
       </a>
       <ul class="sticky-nav-links" role="list">
-        <li><a href="index.html#mass-times">Mass Times</a></li>
         <li><a href="religious-education.html">Religious Education</a></li>
-        <li><a href="index.html#events">Events</a></li>
-        <li><a href="index.html#about">About</a></li>
-        <li><a href="index.html#clergy">Our Clergy</a></li>
-        <li><a href="index.html#social">Media</a></li>
+        <li><a href="media.html">Media</a></li>
         <li><a href="index.html#donate" class="sticky-nav-donate">Donate</a></li>
         <li><a href="index.html#contact">Contact</a></li>
       </ul>
@@ -64,12 +65,8 @@
   <!-- NAV DRAWER -->
   <nav class="hero-nav-drawer" id="heroNavDrawer" hidden aria-label="Main navigation">
     <ul>
-      <li><a href="index.html#mass-times">Mass Times</a></li>
       <li><a href="religious-education.html">Religious Education</a></li>
-      <li><a href="index.html#events">Events</a></li>
-      <li><a href="index.html#about">About</a></li>
-      <li><a href="index.html#clergy">Our Clergy</a></li>
-      <li><a href="index.html#social">Media</a></li>
+      <li><a href="media.html">Media</a></li>
       <li><a href="index.html#donate">Donate</a></li>
       <li><a href="index.html#contact">Contact</a></li>
     </ul>
@@ -136,7 +133,7 @@
             <div class="sp-timeline-item">
               <p class="sp-timeline-year">Year — To be added</p>
               <p class="sp-timeline-title">Current Home — Fairfield, CT</p>
-              <p class="sp-timeline-desc">The mission found its current home at 838 Kings Hwy E, Fairfield, CT, where our parish family gathers every Sunday for the 4:00 PM Holy Mass.</p>
+              <p class="sp-timeline-desc">The mission found its current home at 838 Kings Hwy E, Fairfield, CT, where our parish family gathers every Sunday for Holy Mass.</p>
             </div>
           </div>
         </div>
@@ -148,7 +145,7 @@
           <p class="section-subtitle">An ancient tradition preserved through the centuries</p>
         </div>
 
-        <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:1.25rem; margin-bottom:2rem;">
+        <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(min(100%, 260px), 1fr)); gap:1.25rem; margin-bottom:2rem;">
           <div class="sp-card" style="margin-bottom:0;">
             <h3>✝ &nbsp;Apostolic Origins</h3>
             <p>The Syro Malabar Church traces its origins to the missionary work of Saint Thomas the Apostle, who arrived on the Malabar coast of India in 52 AD. This makes us one of the oldest Christian communities in the world.</p>
@@ -198,7 +195,7 @@
             </div>
 
             <div class="sp-priest-tile">
-              <img src="images/priest-photo.jpg" alt="Fr. James Vattakkunnel V.C" class="sp-priest-photo"
+              <img src="images/fr-james-vattakkunnel.jpg" alt="Fr. James Vattakkunnel V.C" class="sp-priest-photo"
                 onerror="this.outerHTML='<div class=\'sp-priest-placeholder\'>✝</div>'">
               <p class="sp-priest-name">Fr. James Vattakkunnel V.C</p>
               <p class="sp-priest-years">2018 – Present</p>
@@ -223,33 +220,34 @@
           <div class="footer-cross" aria-hidden="true">✝</div>
           <p class="footer-name">Our Lady Of Assumption</p>
           <p class="footer-tagline">Syro Malabar Catholic Mission</p>
+          <div class="footer-social">
+            <a href="https://www.facebook.com/ourladyofassumptionsmcc" id="footerFacebook" target="_blank" rel="noopener noreferrer" aria-label="Facebook" title="Facebook"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M24 12.07C24 5.41 18.63 0 12 0S0 5.41 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.04V9.41c0-3.02 1.8-4.7 4.54-4.7 1.31 0 2.68.24 2.68.24v2.97H15.8c-1.49 0-1.95.93-1.95 1.88v2.27h3.32l-.53 3.49h-2.79V24C19.61 23.1 24 18.1 24 12.07z"/></svg></a>
+            <a href="https://www.instagram.com/syro_connecticut" id="footerInstagram" target="_blank" rel="noopener noreferrer" aria-label="Instagram" title="Instagram"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M12 2.2c3.2 0 3.6 0 4.9.1 3.3.2 4.8 1.7 5 5 .1 1.3.1 1.6.1 4.8 0 3.2 0 3.6-.1 4.8-.2 3.3-1.7 4.8-5 5-1.3.1-1.6.1-4.9.1-3.2 0-3.6 0-4.8-.1-3.3-.2-4.8-1.7-5-5C2.1 15.6 2 15.2 2 12c0-3.2 0-3.6.1-4.8.2-3.3 1.7-4.8 5-5 1.2-.1 1.6-.1 4.9-.1zm0-2.2C8.7 0 8.3 0 7.1.1 2.7.3.3 2.7.1 7.1.0 8.3 0 8.7 0 12c0 3.3 0 3.7.1 4.9.2 4.4 2.6 6.8 7 7C8.3 24 8.7 24 12 24c3.3 0 3.7 0 4.9-.1 4.4-.2 6.8-2.6 7-7 .1-1.2.1-1.6.1-4.9 0-3.3 0-3.7-.1-4.9-.2-4.4-2.6-6.8-7-7C15.7 0 15.3 0 12 0zm0 5.8a6.2 6.2 0 100 12.4A6.2 6.2 0 0012 5.8zm0 10.2a4 4 0 110-8 4 4 0 010 8zm6.4-11.8a1.44 1.44 0 100 2.88 1.44 1.44 0 000-2.88z"/></svg></a>
+            <a href="https://www.youtube.com/@OurLadyOfAssumptionSyroMalabar" id="footerYoutube" target="_blank" rel="noopener noreferrer" aria-label="YouTube" title="YouTube"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M23.5 6.2a3 3 0 00-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 00.5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 002.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 002.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg></a>
+          </div>
         </div>
         <nav class="footer-nav" aria-label="Footer navigation">
           <h4>Quick Links</h4>
           <ul role="list">
-            <li><a href="index.html#mass-times">Mass Times</a></li>
-            <li><a href="index.html#events">Events</a></li>
-            <li><a href="index.html#about">About Us</a></li>
-            <li><a href="index.html#clergy">Our Clergy</a></li>
+            <li><a href="religious-education.html">Religious Education</a></li>
             <li><a href="index.html#donate">Donate</a></li>
-            <li><a href="index.html#contact">Contact</a></li>
           </ul>
         </nav>
         <div class="footer-sacraments">
           <h4>Sacraments</h4>
           <ul role="list">
-            <li><a href="index.html#contact">Baptism</a></li>
-            <li><a href="index.html#contact">First Communion</a></li>
-            <li><a href="index.html#contact">Confirmation</a></li>
-            <li><a href="index.html#contact">Marriage</a></li>
-            <li><a href="index.html#contact">Anointing of the Sick</a></li>
+            <li>Baptism</li>
+            <li>First Communion</li>
+            <li>Confirmation</li>
+            <li>Marriage</li>
+            <li>Anointing of the Sick</li>
           </ul>
         </div>
         <div class="footer-contact">
           <h4>Contact</h4>
           <p>838 Kings Hwy E<br>Fairfield, CT 06825</p>
-          <p><a href="tel:+12032164859">(203) 216-4859</a></p>
-          <p><a href="mailto:smcc.norwalk@gmail.com">smcc.norwalk@gmail.com</a></p>
+          <p><a data-cfg="phone" href="tel:+12032742702">(203) 274-2702</a></p>
+          <p><a data-cfg="email" href="mailto:smcc.norwalk@gmail.com">smcc.norwalk@gmail.com</a></p>
         </div>
       </div>
       <div class="footer-bottom">

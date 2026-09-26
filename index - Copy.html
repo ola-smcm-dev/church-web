@@ -35,27 +35,27 @@
   <a href="#main-content" class="skip-link">Skip to main content</a>
 
   <!-- ═══════════════════════════════════════════
-       TOP UTILITY BAR — social links & donate
+       TOP UTILITY BAR — contact info
   ═══════════════════════════════════════════ -->
-  <div class="topbar" role="complementary" aria-label="Social media and donate">
+  <div class="topbar" role="complementary" aria-label="Contact information">
     <div class="topbar-inner">
-      <div class="topbar-social" aria-label="Follow us">
-        <a href="#" id="topbarFacebook" class="topbar-social-link" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
-          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M24 12.07C24 5.41 18.63 0 12 0S0 5.41 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.04V9.41c0-3.02 1.8-4.7 4.54-4.7 1.31 0 2.68.24 2.68.24v2.97H15.8c-1.49 0-1.95.93-1.95 1.88v2.27h3.32l-.53 3.49h-2.79V24C19.61 23.1 24 18.1 24 12.07z"/></svg>
-        </a>
-        <a href="#" id="topbarInstagram" class="topbar-social-link" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
-          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M12 2.2c3.2 0 3.6 0 4.9.1 3.3.2 4.8 1.7 5 5 .1 1.3.1 1.6.1 4.8 0 3.2 0 3.6-.1 4.8-.2 3.3-1.7 4.8-5 5-1.3.1-1.6.1-4.9.1-3.2 0-3.6 0-4.8-.1-3.3-.2-4.8-1.7-5-5C2.1 15.6 2 15.2 2 12c0-3.2 0-3.6.1-4.8.2-3.3 1.7-4.8 5-5 1.2-.1 1.6-.1 4.9-.1zm0-2.2C8.7 0 8.3 0 7.1.1 2.7.3.3 2.7.1 7.1.0 8.3 0 8.7 0 12c0 3.3 0 3.7.1 4.9.2 4.4 2.6 6.8 7 7C8.3 24 8.7 24 12 24c3.3 0 3.7 0 4.9-.1 4.4-.2 6.8-2.6 7-7 .1-1.2.1-1.6.1-4.9 0-3.3 0-3.7-.1-4.9-.2-4.4-2.6-6.8-7-7C15.7 0 15.3 0 12 0zm0 5.8a6.2 6.2 0 100 12.4A6.2 6.2 0 0012 5.8zm0 10.2a4 4 0 110-8 4 4 0 010 8zm6.4-11.8a1.44 1.44 0 100 2.88 1.44 1.44 0 000-2.88z"/></svg>
-        </a>
-        <a href="#" id="topbarYoutube" class="topbar-social-link" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
-          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M23.5 6.2a3 3 0 00-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 00.5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 002.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 002.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg>
-        </a>
-      </div>
-      <div class="topbar-right">
-        <a href="#donate" class="topbar-donate-btn">Donate</a>
-        <button class="topbar-hamburger" id="topbarHamburger" aria-label="Open navigation menu" aria-expanded="false">
-          <span></span><span></span><span></span>
-        </button>
-      </div>
+      <a class="topbar-item" id="topbarAddress" href="#contact" aria-label="Our address">
+        <span class="topbar-icon" aria-hidden="true">📍</span>
+        <span class="topbar-text">838 Kings Hwy E, Fairfield, CT 06825</span>
+      </a>
+      <span class="topbar-divider" aria-hidden="true">·</span>
+      <a class="topbar-item" id="topbarPhone" data-cfg="phone" href="tel:+12032742702" aria-label="Call us">
+        <span class="topbar-icon" aria-hidden="true">📞</span>
+        <span class="topbar-text">(203) 274-2702</span>
+      </a>
+      <span class="topbar-divider" aria-hidden="true">·</span>
+      <a class="topbar-item" id="topbarEmail" data-cfg="email" href="mailto:smcc.norwalk@gmail.com" aria-label="Email us">
+        <span class="topbar-icon" aria-hidden="true">✉</span>
+        <span class="topbar-text">smcc.norwalk@gmail.com</span>
+      </a>
+      <button class="topbar-hamburger" id="topbarHamburger" aria-label="Open navigation menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
     </div>
   </div>
 
@@ -72,8 +72,8 @@
         </div>
       </a>
       <ul class="sticky-nav-links" role="list">
-        <li><a href="religious-education.html">Religious Education</a></li>
-        <li><a href="media.html">Media</a></li>
+        <li><a href='/religious-education'>Religious Education</a></li>
+        <li><a href='/media'>Media</a></li>
         <li><a href="#donate" class="sticky-nav-donate">Donate</a></li>
         <li><a href="#contact">Contact</a></li>
       </ul>
@@ -91,127 +91,23 @@
          Left  (65) : photo → clergy → about → calendar
          Right (35) : schedule → join us → announce → posters → events → donate
     ═══════════════════════════════════════════ -->
-    <section id="home" class="hero-section" aria-label="Welcome to Our Lady Of Assumption">
-      <div class="hero-header">
-        <a href="#home" class="hero-brand" aria-label="Home">
-          <img src="images/churchlogo.png" alt="Parish Logo" class="hero-logo" onerror="this.style.display='none'">
-        </a>
-      </div>
-      <div class="hg-photo-overlay">
-        <p class="hg-photo-welcome">Welcome to</p>
-        <h2 class="hg-photo-title">Our Lady Of Assumption</h2>
-        <p class="hg-photo-sub">Fairfield, Connecticut</p>
-      </div>
-    </section>
+    <section id="home" class="home-grid" aria-label="Welcome to Our Lady Of Assumption">
 
-    <!-- ═══════════════════════════════════════════
-         TAGLINE BAND — full width, below the hero
-    ═══════════════════════════════════════════ -->
-    <div class="hg-tagline">
-      <img src="images/syro-malabar-cross.png" alt="" class="hg-tagline-icon" aria-hidden="true" onerror="this.style.display='none'">
-      <p class="hg-tagline-text">A Syro-Malabar Catholic Mission, preserving Kerala Catholic traditions through Malayalam Mass, faith formation, and vibrant celebrations.</p>
-    </div>
+    <div class="hg-left">
 
-    <!-- ═══════════════════════════════════════════
-         QUICK INFO ROW — Mass Schedule, Contact Us, Join actions
-
-         This row is a self-sizing grid (see .quick-info-row in style.css).
-         To ADD a card: copy one of the three <div class="... qir-card">
-         blocks below, give it a unique id, and change its content — it
-         will automatically take its place in the row (wraps to a new
-         row on narrow screens, stacks full-width on mobile/tablet). No
-         CSS changes needed as long as the card keeps the qir-card class.
-         To REMOVE a card: just delete its block; the others expand to
-         fill the space automatically.
-    ═══════════════════════════════════════════ -->
-    <section class="quick-info-row" aria-label="Mass schedule and quick links">
-
-      <!-- Mass Schedule -->
-      <div class="hg-schedule qir-card" id="mass-times" aria-label="Mass schedule">
-        <div class="qir-pill qir-pill--full">Holy Mass Schedule</div>
-
-        <div class="hg-schedule-box" id="massScheduleBox">
-          <div class="hg-row">
-            <span class="hg-row-label">Holy Mass<br><em>in Malayalam</em></span>
-            <span class="hg-row-time-wrap">
-              <span class="hg-row-freq">Every Sunday</span>
-              <span class="hg-row-time">12:30 PM</span>
-            </span>
-          </div>
-          <div class="hg-row">
-            <span class="hg-row-label">Religious Education</span>
-            <span class="hg-row-time-wrap">
-              <span class="hg-row-freq">Every Sunday</span>
-              <span class="hg-row-time">11:30 AM</span>
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Contact Us -->
-      <div class="hg-contact qir-card" id="contact" aria-labelledby="contact-card-heading">
-        <div class="qir-pill qir-pill--full" id="contact-card-heading">Contact Us</div>
-        <div class="hg-contact-rows">
-          <a class="hg-contact-row" href="https://www.google.com/maps/dir/?api=1&destination=838+Kings+Hwy+E%2C+Fairfield%2C+CT+06825" target="_blank" rel="noopener noreferrer" aria-label="Get directions to 838 Kings Hwy E, Fairfield, CT 06825">
-            <span class="hg-contact-icon" aria-hidden="true">📍</span>
-            <span class="hg-contact-text">838 Kings Hwy E, Fairfield, CT 06825</span>
-          </a>
-          <a class="hg-contact-row" data-cfg="phone" href="tel:+12032742702" aria-label="Call us">
-            <span class="hg-contact-icon" aria-hidden="true">📞</span>
-            <span class="hg-contact-text">(203) 274-2702</span>
-          </a>
-          <a class="hg-contact-row" data-cfg="email" href="mailto:smcc.norwalk@gmail.com" aria-label="Email us">
-            <span class="hg-contact-icon" aria-hidden="true">✉</span>
-            <span class="hg-contact-text">smcc.norwalk@gmail.com</span>
+      <!-- Church photo — hero header overlay -->
+      <div class="hg-photo" id="home">
+        <div class="hero-header">
+          <a href="#home" class="hero-brand" aria-label="Home">
+            <img src="images/churchlogo.png" alt="Parish Logo" class="hero-logo" onerror="this.style.display='none'">
           </a>
         </div>
-        <p class="qir-footnote">We'd love to hear from you!</p>
-      </div>
-
-      <!-- Join Us — one card, three icon cells -->
-      <div class="hg-join-card qir-card" id="join" aria-labelledby="join-heading">
-        <div class="qir-pill qir-pill--full" id="join-heading">Join Us!</div>
-        <div class="hg-join-cells">
-          <!-- Shown by main.js once CONFIG.parishRegistrationUrl is set -->
-          <a href="#" class="quick-btn" id="joinRegisterBtn" target="_blank" rel="noopener noreferrer" hidden>
-            <span class="quick-btn-icon" aria-hidden="true">
-              <svg viewBox="0 0 48 48" width="34" height="34" fill="currentColor" focusable="false">
-                <rect x="20.5" y="3" width="3" height="10"/>
-                <rect x="16" y="7.5" width="12" height="3"/>
-                <path d="M10 44V20L24 9l14 11v24z" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
-                <rect x="21" y="30" width="6" height="14"/>
-                <rect x="15" y="21" width="5" height="5"/>
-                <rect x="28" y="21" width="5" height="5"/>
-              </svg>
-            </span>
-            <span class="quick-btn-label">Register with the Parish &rarr;</span>
-          </a>
-          <!-- Shown by main.js once CONFIG.ccdRegistrationUrl is set -->
-          <a href="#" class="quick-btn" id="joinCcdBtn" target="_blank" rel="noopener noreferrer" hidden>
-            <span class="quick-btn-icon" aria-hidden="true">🎓</span>
-            <span class="quick-btn-label">Register for Religious Education &rarr;</span>
-          </a>
-          <a href="#" class="quick-btn" id="waJoinLink" aria-haspopup="dialog">
-            <span class="quick-btn-icon" aria-hidden="true">
-              <svg class="hg-wa-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
-                <path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.532 5.859L.057 23.486a.5.5 0 0 0 .614.614l5.63-1.476A11.94 11.94 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.882a9.87 9.87 0 0 1-5.032-1.378l-.36-.214-3.733.979.998-3.645-.235-.374A9.861 9.861 0 0 1 2.118 12C2.118 6.533 6.533 2.118 12 2.118S21.882 6.533 21.882 12 17.467 21.882 12 21.882z"/>
-              </svg>
-            </span>
-            <span class="quick-btn-label">Join WhatsApp Group &rarr;</span>
-          </a>
+        <div class="hg-photo-overlay">
+          <p class="hg-photo-welcome">Welcome to</p>
+          <h2 class="hg-photo-title">Our Lady Of Assumption</h2>
+          <p class="hg-photo-sub">A Syro Malabar Catholic Mission</p>
         </div>
-        <p class="qir-footnote">Welcome to our parish!</p>
       </div>
-
-    </section>
-
-    <!-- ═══════════════════════════════════════════
-         LOWER GRID — Clergy/Calendar (left) · Announcements/Posters/Donate (right)
-    ═══════════════════════════════════════════ -->
-    <section class="lower-grid" aria-label="Clergy, calendar, announcements and notices">
-
-    <div class="lg-left">
 
       <!-- Clergy & Staff -->
       <div class="hg-clergy" id="clergy" aria-labelledby="clergy-heading">
@@ -299,11 +195,54 @@
         </div>
       </div>
 
-    </div><!-- /.lg-left -->
+    </div><!-- /.hg-left -->
 
-    <div class="lg-right">
+    <div class="hg-right">
 
-      <!-- Announcements (hidden until the sheet has at least one active announcement) -->
+      <!-- Mass Schedule -->
+      <div class="hg-schedule" id="mass-times" aria-label="Mass schedule">
+        <div class="hg-section-title">
+          <span class="hg-ornament" aria-hidden="true">✦ ✦ ✦</span>
+          <h2>Mass Schedule</h2>
+        </div>
+
+        <div class="hg-schedule-box" id="massScheduleBox">
+          <div class="hg-row">
+            <span class="hg-row-label">Sunday Holy Mass</span>
+            <span class="hg-row-time">12:30 PM</span>
+          </div>
+          <div class="hg-row">
+            <span class="hg-row-label">Religious Education<br><em>(before Sunday Holy Mass)</em></span>
+            <span class="hg-row-time">11:30 AM</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cell col-2, row 2 — Join Us (WhatsApp group + parish registration) -->
+      <div class="hg-join" id="join" aria-labelledby="join-heading">
+        <div class="hg-section-title">
+          <span class="hg-ornament" aria-hidden="true">✦ ✦ ✦</span>
+          <h2 id="join-heading">Join Us</h2>
+        </div>
+        <div class="hg-join-box">
+          <p class="hg-join-text" id="joinText">Be part of our parish family. Join our WhatsApp group for parish updates and announcements.</p>
+          <div class="hg-join-actions">
+            <!-- Shown by main.js once CONFIG.parishRegistrationUrl is set -->
+            <a href="#" class="join-btn join-btn--primary" id="joinRegisterBtn" target="_blank" rel="noopener noreferrer" hidden>Register with the Parish &rarr;</a>
+            <!-- Shown by main.js once CONFIG.ccdRegistrationUrl is set -->
+            <a href="#" class="join-btn join-btn--ccd" id="joinCcdBtn" target="_blank" rel="noopener noreferrer" hidden>Register for Religious Education &rarr;</a>
+            <a href="#" class="join-btn join-btn--wa" id="waJoinLink" aria-haspopup="dialog">
+              <svg class="hg-wa-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+                <path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.532 5.859L.057 23.486a.5.5 0 0 0 .614.614l5.63-1.476A11.94 11.94 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.882a9.87 9.87 0 0 1-5.032-1.378l-.36-.214-3.733.979.998-3.645-.235-.374A9.861 9.861 0 0 1 2.118 12C2.118 6.533 6.533 2.118 12 2.118S21.882 6.533 21.882 12 17.467 21.882 12 21.882z"/>
+              </svg>
+              Join WhatsApp Group
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cell col-2, row 2 — Announcements (hidden until the sheet has at least one active announcement) -->
       <div class="hg-announce" id="announcements" aria-label="Parish announcements" hidden>
         <div class="hg-section-title">
           <span class="hg-ornament" aria-hidden="true">✦ ✦ ✦</span>
@@ -314,7 +253,7 @@
         </div>
       </div>
 
-      <!-- Parish Posters carousel (hidden until JS loads posters) -->
+      <!-- Cell col-2, row 3 — Parish Posters carousel (hidden until JS loads posters) -->
       <div class="hg-posters" id="hg-posters-cell" aria-label="Parish notices" hidden>
         <div class="hg-section-title">
           <span class="hg-ornament" aria-hidden="true">✦ ✦ ✦</span>
@@ -328,26 +267,52 @@
         </div>
       </div>
 
-      <!-- Donate — always shown, so this column is never fully empty
-           when there are no announcements or posters -->
-      <div class="hg-donate-side" id="donate" aria-labelledby="donate-side-heading">
+
+      <!-- Cell col-2, row 4 — Support Our Parish (desktop only) -->
+      <div class="hg-donate" id="donate" data-mobile-fallback="donate-mobile" aria-labelledby="hg-donate-heading">
         <div class="hg-section-title">
           <span class="hg-ornament" aria-hidden="true">✦ ✦ ✦</span>
-          <h2 id="donate-side-heading">Donate</h2>
+          <h2 id="hg-donate-heading">Support Our Parish</h2>
         </div>
-        <div class="hg-donate-row">
-          <img src="images/churchdonation_new.jpeg" alt="Scan to donate — QR code" class="hg-donate-qr">
-          <div class="hg-donate-text-block">
-            <p>Scan QR Code via Zelle</p>
-            <p>Zelle to <a href="mailto:smcc.norwalk@gmail.com"><strong>smcc.norwalk@gmail.com</strong></a></p>
-            <p>Check payable to "Our Lady Of Assumption"</p>
+        <div class="hg-donate-box">
+          <p class="hg-donate-text">Your generosity sustains our parish and serves those in need. Every gift makes a difference.</p>
+          <div class="hg-donate-qr-wrap">
+            <img src="images/ChurchDonation.jpeg" alt="Scan to donate — QR code" class="hg-donate-qr">
+            <p class="hg-donate-qr-caption">Pay via Zelle (<strong>smcc.norwalk@gmail.com</strong>) or scan to donate</p>
           </div>
+          <p class="hg-donate-note">
+            Checks payable to <strong>"Our Lady Of Assumption"</strong> — dropped in during Sunday Holy Mass.
+            All donations are tax exempt.
+          </p>
         </div>
-        <p class="qir-footnote">Every gift makes a difference. Thank you for your generosity!</p>
       </div>
 
-    </div><!-- /.lg-right -->
+    </div><!-- /.hg-right -->
 
+    </section>
+
+    <!-- ═══════════════════════════════════════════
+         DONATIONS (mobile only — desktop shows in home grid)
+    ═══════════════════════════════════════════ -->
+    <section class="section section-white donate-mobile" id="donate-mobile" aria-labelledby="donate-mobile-heading">
+      <div class="container">
+        <div class="donate-card animate-on-scroll">
+          <div class="donate-cross" aria-hidden="true">✝</div>
+          <h2 id="donate-mobile-heading">Support Our Parish</h2>
+          <p class="donate-text">
+            Your generous contributions enable us to maintain our church, and serve those in need. Every gift — large or small — makes a difference in the life of our parish.
+          </p>
+          <div class="donate-qr-wrap">
+            <img src="images/ChurchDonation.jpeg" alt="Scan to donate online — QR code" class="donate-qr">
+            <p class="donate-qr-caption">Pay via Zelle (<strong>smcc.norwalk@gmail.com</strong>) or scan to donate</p>
+          </div>
+          <p class="donate-note">
+            For mail donations — Checks may be made payable to <strong>"Our Lady Of Assumption"</strong>
+            and dropped in during the Sunday Holy Mass.
+            All donations are tax exempt.
+          </p>
+        </div>
+      </div>
     </section>
 
     <!-- ═══════════════════════════════════════════
@@ -365,7 +330,7 @@
           <div class="pl-video-feature" id="plVideoFeature"></div>
           <div class="pl-video-list" id="plVideoList"></div>
         </div>
-        <p class="pl-more"><a class='btn btn-secondary' href='media.html#videos'>Watch all videos &rarr;</a></p>
+        <p class="pl-more"><a class='btn btn-secondary' href='/media#videos'>Watch all videos &rarr;</a></p>
       </div>
     </section>
 
@@ -380,8 +345,85 @@
           <h2 id="pl-photos-heading">Parish Life in Pictures</h2>
           <p class="section-subtitle">A glimpse of our recent celebrations and gatherings</p>
         </div>
-        <div class="pl-slideshow" id="plMosaic"></div>
-        <p class="pl-more"><a class='btn btn-primary' href='media.html#photos'>All photos &amp; albums &rarr;</a></p>
+        <div class="pl-mosaic" id="plMosaic"></div>
+        <p class="pl-more"><a class='btn btn-primary' href='/media#photos'>All photos &amp; albums &rarr;</a></p>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════
+         CONTACT & MAP
+    ═══════════════════════════════════════════ -->
+    <section id="contact" class="section section-cream" aria-labelledby="contact-heading">
+      <div class="container">
+        <div class="section-header animate-on-scroll">
+          <div class="ornament" aria-hidden="true">✦ ✦ ✦</div>
+          <h2 id="contact-heading">Contact &amp; Location</h2>
+          <p class="section-subtitle">We would love to hear from you</p>
+        </div>
+
+        <div class="contact-layout">
+          <div class="contact-info animate-on-scroll">
+            <div class="contact-item">
+              <div class="contact-icon" aria-hidden="true">📍</div>
+              <div>
+                <h3>Address</h3>
+                <address id="contactAddress">
+                  838 Kings Hwy E<br>
+                  Fairfield, CT 06825
+                </address>
+              </div>
+            </div>
+
+            <div class="contact-item">
+              <div class="contact-icon" aria-hidden="true">📞</div>
+              <div>
+                <h3>Phone</h3>
+                <p><a data-cfg="phone" href="tel:+12032742702" id="contactPhone">(203) 274-2702</a></p>
+              </div>
+            </div>
+
+            <div class="contact-item">
+              <div class="contact-icon" aria-hidden="true">✉️</div>
+              <div>
+                <h3>Email</h3>
+                <p><a data-cfg="email" href="mailto:smcc.norwalk@gmail.com" id="contactEmail">smcc.norwalk@gmail.com</a></p>
+              </div>
+            </div>
+
+            <div class="contact-item">
+              <div class="contact-icon" aria-hidden="true">📰</div>
+              <div>
+                <h3>Parish Bulletin</h3>
+                <p>Published every Sunday. Available in the church foyer and on our social media pages.</p>
+              </div>
+            </div>
+
+            <div class="contact-social-links">
+              <a href="#" id="contactFacebook" class="contact-social-btn" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.07C24 5.41 18.63 0 12 0S0 5.41 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.04V9.41c0-3.02 1.8-4.7 4.54-4.7 1.31 0 2.68.24 2.68.24v2.97H15.8c-1.49 0-1.95.93-1.95 1.88v2.27h3.32l-.53 3.49h-2.79V24C19.61 23.1 24 18.1 24 12.07z"/></svg>
+                Facebook
+              </a>
+              <a href="#" id="contactInstagram" class="contact-social-btn" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.2c3.2 0 3.6 0 4.9.1 3.3.2 4.8 1.7 5 5 .1 1.3.1 1.6.1 4.8 0 3.2 0 3.6-.1 4.8-.2 3.3-1.7 4.8-5 5-1.3.1-1.6.1-4.9.1-3.2 0-3.6 0-4.8-.1-3.3-.2-4.8-1.7-5-5C2.1 15.6 2 15.2 2 12c0-3.2 0-3.6.1-4.8.2-3.3 1.7-4.8 5-5 1.2-.1 1.6-.1 4.9-.1zm0-2.2C8.7 0 8.3 0 7.1.1 2.7.3.3 2.7.1 7.1.0 8.3 0 8.7 0 12c0 3.3 0 3.7.1 4.9.2 4.4 2.6 6.8 7 7C8.3 24 8.7 24 12 24c3.3 0 3.7 0 4.9-.1 4.4-.2 6.8-2.6 7-7 .1-1.2.1-1.6.1-4.9 0-3.3 0-3.7-.1-4.9-.2-4.4-2.6-6.8-7-7C15.7 0 15.3 0 12 0zm0 5.8a6.2 6.2 0 100 12.4A6.2 6.2 0 0012 5.8zm0 10.2a4 4 0 110-8 4 4 0 010 8zm6.4-11.8a1.44 1.44 0 100 2.88 1.44 1.44 0 000-2.88z"/></svg>
+                Instagram
+              </a>
+              <a href="#" id="contactYoutube" class="contact-social-btn" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.2a3 3 0 00-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 00.5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 002.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 002.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg>
+                YouTube
+              </a>
+            </div>
+          </div>
+
+          <div class="contact-map animate-on-scroll">
+            <div class="map-wrap" id="mapEmbed">
+              <!-- Google Map injected by main.js -->
+              <div class="map-placeholder">
+                <p>📍 Map loading&hellip;</p>
+                <p>Add your Google Maps embed URL in main.js CONFIG</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -407,7 +449,7 @@
         <nav class="footer-nav" aria-label="Footer navigation">
           <h4>Quick Links</h4>
           <ul role="list">
-            <li><a href="religious-education.html">Religious Education</a></li>
+            <li><a href='/religious-education'>Religious Education</a></li>
             <li><a href="#donate">Donate</a></li>
           </ul>
         </nav>
