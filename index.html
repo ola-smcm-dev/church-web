@@ -2,9 +2,6 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-<!-- This site is hosted on Netlify. Anyone can build and deploy a site
-     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=63c0a317-5f14-4855-ac7d-502bed0535fa
-     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Welcome To Our Lady Of Assumption — Syro Malabar Catholic Mission in Fairfield, CT. Malayalam Holy Mass Every Sunday.">
   <meta name="keywords" content="Syro Malabar Stamford, Syro Malabar Norwalk, Syro Malabar Trumbull, Syro Malabar Shelton, Syro Malabar Fairfield, Malayalam Mass">
@@ -14,11 +11,15 @@
   <link rel="icon" type="image/png" href="images/favicon-192.png" sizes="192x192">
   <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
 
+  <!-- Canonical URL — tells Google which address is the "real" one to index -->
+  <link rel="canonical" href="https://olasyromalabarct.org/">
+
   <!-- Open Graph -->
   <meta property="og:title" content="Welcome To Our Lady Of Assumption — Syro Malabar Catholic Mission, Fairfield, CT">
   <meta property="og:description" content="Syro Malabar Catholic Mission in Fairfield, CT.">
   <meta property="og:keywords" content="Syro Malabar Stamford, Syro Malabar Norwalk, Syro Malabar Trumbull, Syro Malabar Shelton, Syro Malabar Fairfield, Malayalam Mass">
-  <meta property="og:image" content="images/hero-bg.jpg">
+  <meta property="og:image" content="https://olasyromalabarct.org/images/hero-bg.jpg">
+  <meta property="og:url" content="https://olasyromalabarct.org/">
   <meta property="og:type" content="website">
 
   <title>Our Lady Of Assumption — Syro Malabar Catholic Mission, Fairfield CT</title>
@@ -547,7 +548,34 @@
   "@context": "https://schema.org",
   "@type": "Church",
   "name": "Our Lady of Assumption Syro Malabar Catholic Church",
+  "alternateName": "Our Lady Of Assumption Syro Malabar Catholic Mission",
   "url": "https://olasyromalabarct.org",
+  "logo": "https://olasyromalabarct.org/images/favicon-192.png",
+  "image": "https://olasyromalabarct.org/images/hero-bg.jpg",
+  "telephone": "+1-203-274-2702",
+  "email": "smcc.norwalk@gmail.com",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "838 Kings Hwy E",
+    "addressLocality": "Fairfield",
+    "addressRegion": "CT",
+    "postalCode": "06825",
+    "addressCountry": "US"
+  },
+  "sameAs": [
+    "https://www.facebook.com/ourladyofassumptionsmcc",
+    "https://www.instagram.com/syro_connecticut",
+    "https://www.youtube.com/@OurLadyOfAssumptionSyroMalabar"
+  ],
+  "openingHoursSpecification": [
+    {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": "Sunday",
+      "opens": "12:30",
+      "closes": "13:30",
+      "description": "Holy Mass (Malayalam)"
+    }
+  ],
   "areaServed": ["Stamford", "Norwalk", "Fairfield County","Trumbull","Shelton", "Derby", "New Canan", "Wilton", "Weston","Greenwhich","Southern Connecticut"],
   "knowsLanguage": ["en", "ml"]
 }

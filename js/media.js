@@ -20,10 +20,14 @@
   var API        = (typeof CONFIG !== "undefined" && CONFIG.mediaApiUrl) ? CONFIG.mediaApiUrl : "";
   var YT_CHANNEL = (typeof CONFIG !== "undefined" && CONFIG.youtubeChannelUrl) ? CONFIG.youtubeChannelUrl : "";
 
-  // Google Drive folder id for the dedicated "Faith Formation" CCD album,
-  // shown in the Photo Gallery on religious-education.html. If that Drive
-  // folder is ever recreated (new id), update this — matching by album
-  // name ("Faith Formation", case-insensitive) is tried as a fallback.
+  // Identifies CCD/Faith Formation albums for the Photo Gallery on
+  // religious-education.html. Once Code.gs is updated to tag each album
+  // with a "category" field (see initReligiousEducation() below), that's
+  // the primary match. Until then — or for older cached API responses —
+  // this Drive folder id (the CCD category folder itself, matches only a
+  // photo placed loose in it, not inside a year/month sub-folder) and a
+  // "Faith Formation" name match are tried as fallbacks. If that Drive
+  // folder is ever recreated (new id), update this.
   var CCD_ALBUM_ID = "1JArk3OTmxoYeAoC_9L9-MCJ9jLZyKErt";
 
   /* ── Small helpers ─────────────────────────────── */
@@ -260,11 +264,16 @@
 
   /* ═════════════════════════════════════════════════
      RELIGIOUS EDUCATION PAGE — "Photo Gallery" section
-     A random sample of photos from the dedicated Faith Formation Drive
-     folder (see CCD_ALBUM_ID above), shown with the same slideshow
-     treatment as the home page's Parish Life section. Falls back to the
-     static "Photo coming soon" placeholder grid already in
-     religious-education.html until that album actually has photos.
+     A random sample of photos pooled from the 3 MOST RECENT CCD/Faith
+     Formation Drive albums (see CCD_ALBUM_ID above for how those are
+     identified — e.g. one album per activity/year sub-folder, such as
+     "PumpkinPainting 2024"), shown with the same slideshow treatment as
+     the home page's Parish Life section — same "pool from the latest 3"
+     rule as that section, just scoped to CCD albums only instead of every
+     category. Each CCD sub-folder stays its own separate album (for
+     naming, and everywhere else on the site, e.g. the Media page's
+     albums grid) — this pooling is only for what this one slideshow
+     shows. Hidden entirely until at least one CCD photo is found.
      ═════════════════════════════════════════════════ */
   function initReligiousEducation() {
     var sec = $("rePhotos");
@@ -273,13 +282,17 @@
 
     buildSlideshow(mos, function (data) {
       var albums = (data && data.albums) || [];
-      var album = null;
-      albums.some(function (a) {
-        if (a.id === CCD_ALBUM_ID || (a.name && /faith\s*formation/i.test(a.name))) { album = a; return true; }
-        return false;
+      var ccdAlbums = albums.filter(function (a) {
+        return a.category === "ccd" || a.id === CCD_ALBUM_ID || (a.name && /faith\s*formation/i.test(a.name));
+      }).slice(0, 3);
+      if (!ccdAlbums.length) return [];
+      var pool = [];
+      ccdAlbums.forEach(function (album) {
+        (album.photos || []).forEach(function (p) {
+          pool.push({ id: p.id, name: p.name, album: album.name });
+        });
       });
-      if (!album || !album.photos || !album.photos.length) return [];
-      var pool = album.photos.map(function (p) { return { id: p.id, name: p.name, album: album.name }; });
+      if (!pool.length) return [];
       return shuffle(pool).slice(0, 10);
     }, "Faith Formation", function (has) {
       sec.hidden = !has;

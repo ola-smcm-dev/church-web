@@ -905,6 +905,16 @@ body.sticky-visible .hero-nav-drawer { top: calc(var(--topbar-height) + 62px); }
   line-height: 1.6;
 }
 
+/* Posters now come straight from a Drive folder (no Title/Date/Description
+   sheet columns), so a poster whose filename doesn't yield a clean title
+   (see niceName() in initPosters(), js/main.js) leaves these empty —
+   collapse them instead of showing blank lines. */
+.poster-lightbox-date:empty,
+.poster-lightbox-title:empty,
+.poster-lightbox-desc:empty {
+  display: none;
+}
+
 /* ══════════════════════════════════════════
    PARISH CALENDAR
 ══════════════════════════════════════════ */
@@ -2889,12 +2899,21 @@ body.subpage {
   /* Quick info row — single column, Mass Schedule first (already first in source order) */
   .quick-info-row { grid-template-columns: 1fr; padding: 1.5rem 1.25rem; }
 
-  /* Lower grid — single column: Clergy + Calendar, then Announcements + Posters */
+  /* Lower grid — single column, reordered so Announcements leads (right
+     after the Join Us / Contact Us row), then Clergy, Calendar, Posters,
+     Donate. The desktop two-column split (lg-left: Clergy+Calendar,
+     lg-right: Announcements+Posters+Donate) is why the markup itself
+     stays grouped that way — at this width the two wrapper columns are
+     collapsed with display:contents so their children become direct
+     .lower-grid flex items, reordered with `order` instead of moving
+     markup around. */
   .lower-grid { flex-direction: column; }
-  .lg-left, .lg-right { flex: 0 0 auto; }
-  .lg-right { border-left: none; border-top: 4px solid var(--gold); }
-  .hg-clergy { border-top: 1px solid var(--cream-dark); padding: 1.4rem 1.1rem 1.5rem; }
-  .hg-events { border-top: 4px solid var(--gold); }
+  .lg-left, .lg-right { display: contents; }
+  #announcements    { order: 1; border-top: 4px solid var(--gold); }
+  .hg-clergy        { order: 2; border-top: 1px solid var(--cream-dark); padding: 1.4rem 1.1rem 1.5rem; }
+  .hg-events        { order: 3; border-top: 4px solid var(--gold); }
+  #hg-posters-cell  { order: 4; }
+  #donate           { order: 5; }
 
   .section { padding: 3.5rem 0; }
 

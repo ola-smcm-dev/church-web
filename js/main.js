@@ -67,13 +67,12 @@ const CONFIG = {
   // File → Share → Publish to web → (this tab) → CSV → Publish
   eventsSheetUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSluQ2kZE_gDTLtpDOkBMlSUBLH9hroTEw3sm3g4AMwYAcyH1FHImxiTXldXHqttzvFnL7JG6K6dlIg/pub?gid=1327592415&single=true&output=csv",
 
-  // ── Parish Posters (Google Sheets) ───────────────
-  // Sheet columns: Title | Date (YYYY-MM-DD) | ImageFileId | Description | Active (Yes/No)
-  // ImageFileId: the ID from the Google Drive share link
-  //   Share link:  https://drive.google.com/file/d/FILE_ID_HERE/view
-  //   Just copy the FILE_ID_HERE part into the sheet.
-  // File → Share → Publish to web → (this tab) → CSV → Publish
-  // Section is hidden automatically when no active posters exist.
+  // ── Parish Posters ─────────────────────────────
+  // No longer a Sheet — posters now come straight from a "Posters" folder
+  // in Drive via the Media API (mediaApiUrl below, ?action=posters). Just
+  // drop image/PDF files in that Drive folder; the newest ones (up to
+  // MAX_POSTERS in Code.gs) show here automatically. This old published-
+  // Sheet URL is kept only as a historical reference and is unused.
   postersSheetUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSluQ2kZE_gDTLtpDOkBMlSUBLH9hroTEw3sm3g4AMwYAcyH1FHImxiTXldXHqttzvFnL7JG6K6dlIg/pub?gid=2077561181&single=true&output=csv",
 
   // ── Mass Times (Google Sheets, tab "Mass Times") ─
@@ -593,7 +592,7 @@ function initPosters() {
 
   if (!cell || !track) return;
 
-  var CACHE_KEY   = "ola_posters_v2";
+  var CACHE_KEY   = "ola_posters_v3";
   var MONTH_NAMES = ["January","February","March","April","May","June",
                      "July","August","September","October","November","December"];
   var posters     = [];
@@ -607,31 +606,42 @@ function initPosters() {
 
   function formatDate(dateStr) {
     if (!dateStr) return "";
-    var d = new Date(dateStr + "T00:00:00");
+    // Posters now come from the Drive API as a full ISO timestamp
+    // (e.g. "2026-09-20T18:03:11.000Z"); the old Sheet-based format was a
+    // plain "YYYY-MM-DD" date, which needs "T00:00:00" appended so it's
+    // parsed in local time rather than shifting a day on UTC-negative
+    // timezones. Handle both.
+    var d = /T/.test(dateStr) ? new Date(dateStr) : new Date(dateStr + "T00:00:00");
     if (isNaN(d)) return dateStr;
     return MONTH_NAMES[d.getMonth()] + " " + d.getDate() + ", " + d.getFullYear();
   }
 
-  function parseRow(cols) {
-    return {
-      title:   (cols[0] || "").trim(),
-      date:    (cols[1] || "").trim(),
-      imageId: (cols[2] || "").trim(),
-      desc:    (cols[3] || "").trim(),
-      active:  (cols[4] || "").trim().toLowerCase()
-    };
+  // Hide camera-style file names (IMG_1234.jpg) but keep meaningful ones —
+  // same rule as niceName() in js/media.js, since posters now come straight
+  // from Drive file names instead of a "Title" column in a Sheet.
+  function niceName(name) {
+    if (!name) return "";
+    var n = String(name).replace(/\.[a-z0-9]{2,5}$/i, "").replace(/[_]+/g, " ").trim();
+    if (/^(img|dsc|dscn|pxl|mvimg|photo|image|screenshot|whatsapp|signal)[\s._-]*[\d\s._-]*$/i.test(n)) return "";
+    if (/^[\d\s._-]+$/.test(n)) return "";
+    return n;
   }
 
-  function parseCSV(csv) {
-    var lines = csv.trim().split("\n");
-    var list  = [];
-    for (var i = 1; i < lines.length; i++) {
-      var cols = parseCSVLine(lines[i].trim());
-      var p    = parseRow(cols);
-      if (p.title && p.active === "yes") list.push(p);
-    }
-    list.sort(function (a, b) { return a.date < b.date ? 1 : a.date > b.date ? -1 : 0; });
-    return list;
+  // Map the Media API's ?action=posters response ({id, name, t}) into the
+  // {title, date, imageId, desc} shape the carousel/lightbox below expect
+  // (unchanged from the old Sheet-based posters, minus a description column
+  // — Drive files don't carry one).
+  function mapApiPosters(list) {
+    var mapped = (list || []).map(function (p) {
+      return {
+        title:   niceName(p.name),
+        date:    p.t || "",
+        imageId: p.id,
+        desc:    ""
+      };
+    });
+    mapped.sort(function (a, b) { return a.date < b.date ? 1 : a.date > b.date ? -1 : 0; });
+    return mapped;
   }
 
   // ── Carousel navigation ──
@@ -685,7 +695,7 @@ function initPosters() {
     // Slides
     track.innerHTML = posters.map(function (p, i) {
       return '<div class="poster-slide" role="button" tabindex="0" aria-label="View ' +
-        escapeHtml(p.title) + ' detail" data-idx="' + i + '">' +
+        escapeHtml(p.title || "poster") + ' detail" data-idx="' + i + '">' +
         (p.imageId ? '<img src="' + driveImg(p.imageId) + '" alt="' + escapeHtml(p.title) + '" loading="lazy">' : '') +
         '</div>';
     }).join("");
@@ -727,18 +737,22 @@ function initPosters() {
   }
 
   // ── Main flow ──
-  if (!CONFIG.postersSheetUrl) return;
+  // Posters now come straight from a Drive folder via the same Media API
+  // that already serves videos/photos (see Code.gs, ?action=posters),
+  // instead of a separate published Sheet.
+  if (!CONFIG.mediaApiUrl) return;
 
   var cached = loadCache();
   if (cached) renderCarousel(cached);
 
-  fetch(CONFIG.postersSheetUrl)
+  fetch(CONFIG.mediaApiUrl + "?action=posters")
     .then(function (res) {
       if (!res.ok) throw new Error("HTTP " + res.status);
-      return res.text();
+      return res.json();
     })
-    .then(function (csv) {
-      var fresh = parseCSV(csv);
+    .then(function (data) {
+      if (!data || !data.ok) throw new Error((data && data.error) || "Bad response");
+      var fresh = mapApiPosters(data.posters);
       saveCache(fresh);
       renderCarousel(fresh);
     })
