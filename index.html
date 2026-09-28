@@ -16,6 +16,7 @@
 
   <!-- Open Graph -->
   <meta property="og:title" content="Welcome To Our Lady Of Assumption — Syro Malabar Catholic Mission, Fairfield, CT">
+  <meta property="og:site_name" content="Our Lady of Assumption Syro Malabar Catholic Mission">
   <meta property="og:description" content="Syro Malabar Catholic Mission in Fairfield, CT.">
   <meta property="og:keywords" content="Syro Malabar Stamford, Syro Malabar Norwalk, Syro Malabar Trumbull, Syro Malabar Shelton, Syro Malabar Fairfield, Malayalam Mass">
   <meta property="og:image" content="https://olasyromalabarct.org/images/hero-bg.jpg">
@@ -216,6 +217,32 @@
 
     <div class="lg-left">
 
+      <!-- Parish Calendar -->
+      <div class="hg-events" id="events" aria-labelledby="events-heading">
+        <div class="hg-section-title">
+          <span class="hg-ornament" aria-hidden="true">✦ ✦ ✦</span>
+          <h2 id="events-heading">Parish Calendar</h2>
+        </div>
+        <div class="cal-header">
+          <button class="cal-nav-btn" id="calPrev" aria-label="Previous month">&#8249;</button>
+          <span class="cal-month-label" id="calMonthLabel"></span>
+          <button class="cal-nav-btn" id="calNext" aria-label="Next month">&#8250;</button>
+        </div>
+        <div class="cal-grid" id="calGrid" role="grid" aria-label="Parish calendar"></div>
+        <div class="cal-detail" id="calDetail" hidden>
+          <div class="cal-detail-header">
+            <span class="cal-detail-date" id="calDetailDate"></span>
+            <button class="cal-detail-close" id="calDetailClose" aria-label="Close">&#x2715;</button>
+          </div>
+          <div class="cal-detail-events" id="calDetailEvents"></div>
+          <div class="cal-detail-readings">
+            <h4 class="cal-readings-title">Daily Readings</h4>
+            <div id="calReadingsStatus" class="cal-readings-status"></div>
+            <div id="calReadingsContent" hidden></div>
+          </div>
+        </div>
+      </div>
+
       <!-- Clergy & Staff -->
       <div class="hg-clergy" id="clergy" aria-labelledby="clergy-heading">
         <div class="hg-section-title">
@@ -273,32 +300,6 @@
             </div>
           </div>
 
-        </div>
-      </div>
-
-      <!-- Parish Calendar -->
-      <div class="hg-events" id="events" aria-labelledby="events-heading">
-        <div class="hg-section-title">
-          <span class="hg-ornament" aria-hidden="true">✦ ✦ ✦</span>
-          <h2 id="events-heading">Parish Calendar</h2>
-        </div>
-        <div class="cal-header">
-          <button class="cal-nav-btn" id="calPrev" aria-label="Previous month">&#8249;</button>
-          <span class="cal-month-label" id="calMonthLabel"></span>
-          <button class="cal-nav-btn" id="calNext" aria-label="Next month">&#8250;</button>
-        </div>
-        <div class="cal-grid" id="calGrid" role="grid" aria-label="Parish calendar"></div>
-        <div class="cal-detail" id="calDetail" hidden>
-          <div class="cal-detail-header">
-            <span class="cal-detail-date" id="calDetailDate"></span>
-            <button class="cal-detail-close" id="calDetailClose" aria-label="Close">&#x2715;</button>
-          </div>
-          <div class="cal-detail-events" id="calDetailEvents"></div>
-          <div class="cal-detail-readings">
-            <h4 class="cal-readings-title">Daily Readings</h4>
-            <div id="calReadingsStatus" class="cal-readings-status"></div>
-            <div id="calReadingsContent" hidden></div>
-          </div>
         </div>
       </div>
 

@@ -2900,8 +2900,8 @@ body.subpage {
   .quick-info-row { grid-template-columns: 1fr; padding: 1.5rem 1.25rem; }
 
   /* Lower grid — single column, reordered so Announcements leads (right
-     after the Join Us / Contact Us row), then Clergy, Calendar, Posters,
-     Donate. The desktop two-column split (lg-left: Clergy+Calendar,
+     after the Join Us / Contact Us row), then Posters, Calendar, Clergy,
+     Donate. The desktop two-column split (lg-left: Calendar+Clergy,
      lg-right: Announcements+Posters+Donate) is why the markup itself
      stays grouped that way — at this width the two wrapper columns are
      collapsed with display:contents so their children become direct
@@ -2910,9 +2910,9 @@ body.subpage {
   .lower-grid { flex-direction: column; }
   .lg-left, .lg-right { display: contents; }
   #announcements    { order: 1; border-top: 4px solid var(--gold); }
-  .hg-clergy        { order: 2; border-top: 1px solid var(--cream-dark); padding: 1.4rem 1.1rem 1.5rem; }
+  #hg-posters-cell  { order: 2; border-top: 1px solid var(--cream-dark); }
   .hg-events        { order: 3; border-top: 4px solid var(--gold); }
-  #hg-posters-cell  { order: 4; }
+  .hg-clergy        { order: 4; border-top: 1px solid var(--cream-dark); padding: 1.4rem 1.1rem 1.5rem; }
   #donate           { order: 5; }
 
   .section { padding: 3.5rem 0; }
