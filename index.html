@@ -233,11 +233,15 @@
         <p class="up-more"><a href="calendar.html">View full calendar &rarr;</a></p>
       </div>
 
-      <!-- Today's Reading — today's Syro-Malabar Scripture reading, via
-           SyroCalendar's own official client-side widget (script tag in
-           <head> + GetLiturgicalReadingsJSON(), per their API docs). Their
-           API only covers "today" — no arbitrary-date lookup — so there's
-           no date picker here; see calendar.html for other dates. -->
+      <!-- Today's Reading — today's Syro-Malabar Scripture reading (English
+           + Malayalam), via SyroCalendar's own official client-side widget
+           (script tag in <head> + GetLiturgicalReadingsJSON(), per their
+           API docs). That widget already returns only the current
+           liturgical season (Set 2, 2026-09-29 confirmed against
+           SyroCalendar's own Set1/Set2/SetToUse data) — never the older
+           Set 1. Their API only covers "today" — no arbitrary-date lookup
+           — so there's no date picker here; see calendar.html for other
+           dates. -->
       <div class="hg-reading" id="readingCard" aria-labelledby="reading-heading">
         <div class="hg-section-title">
           <span class="hg-ornament" aria-hidden="true">✦ ✦ ✦</span>
@@ -247,6 +251,7 @@
         <div class="rd-gospel" id="rdGospelBox" hidden>
           <span class="rd-gospel-label">Gospel</span>
           <span class="rd-gospel-ref" id="rdGospelRef"></span>
+          <span class="rd-gospel-ref-mal" id="rdGospelRefMal" lang="ml"></span>
         </div>
         <p class="rd-status" id="rdStatus">Loading readings&hellip;</p>
         <details class="rd-expand" id="rdExpand" hidden>

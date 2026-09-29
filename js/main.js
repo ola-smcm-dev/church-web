@@ -1053,16 +1053,33 @@ function loadEventsList(onData) {
    A day can have more than one reading set (e.g. a weekday plus
    an overlapping feast), so GetLiturgicalReadingsJSON() always
    returns an array; render() below handles one item or several.
+
+   SyroCalendar's own raw data (confirmed 2026-09-29 by comparing
+   against their site's Set1/Set2/SetToUse response) always has two
+   parallel liturgical calendars running — Set 1 and Set 2 — and
+   GetLiturgicalReadingsJSON() already returns only whichever one is
+   currently active (Set 2, as of this writing), so no extra
+   filtering is needed here; the "current season only" requirement
+   is handled by SyroCalendar's own script. Each field also comes in
+   an _Eng and a _Mal version — both are shown, English first.
    ───────────────────────────────────────────────────── */
 function readingFieldRows(item, skipGospel) {
   return [
-    ["Reading1_Eng",      "Reading1_Title_Eng",      "First Reading"],
-    ["Reading2_Eng",      "Reading2_Title_Eng",      "Second Reading"],
-    ["Reading3_Eng",      "Reading3_Title_Eng",      "Third Reading"],
-    ["ReadingGospal_Eng", "ReadingGospal_Title_Eng", "Gospel"]
-  ].filter(function (f) { return !(skipGospel && f[2] === "Gospel"); })
-   .map(function (f) { return { label: f[2], ref: item[f[0]], title: item[f[1]] }; })
+    ["Reading1_Eng",      "Reading1_Title_Eng",      "Reading1_Mal",      "Reading1_Title_Mal",      "First Reading"],
+    ["Reading2_Eng",      "Reading2_Title_Eng",      "Reading2_Mal",      "Reading2_Title_Mal",      "Second Reading"],
+    ["Reading3_Eng",      "Reading3_Title_Eng",      "Reading3_Mal",      "Reading3_Title_Mal",      "Third Reading"],
+    ["ReadingGospal_Eng", "ReadingGospal_Title_Eng", "ReadingGospal_Mal", "ReadingGospal_Title_Mal", "Gospel"]
+  ].filter(function (f) { return !(skipGospel && f[4] === "Gospel"); })
+   .map(function (f) {
+     return { label: f[4], ref: item[f[0]], title: item[f[1]], refMal: item[f[2]], titleMal: item[f[3]] };
+   })
    .filter(function (r) { return r.ref; });
+}
+
+// "ref (title)" for one language, or "" if there's no ref for it
+function readingLine(ref, title) {
+  if (!ref) return "";
+  return ref + (title ? " (" + title + ")" : "");
 }
 
 /* ─────────────────────────────────────────────────────
@@ -1107,12 +1124,13 @@ function initUpcoming() {
    HOME PAGE — Today's Reading (SyroCalendar widget driven)
    ───────────────────────────────────────────────────── */
 function initReading() {
-  var dayLabel  = document.getElementById("rdDayLabel");
-  var gospelBox = document.getElementById("rdGospelBox");
-  var gospelRef = document.getElementById("rdGospelRef");
-  var status    = document.getElementById("rdStatus");
-  var expand    = document.getElementById("rdExpand");
-  var more      = document.getElementById("rdMore");
+  var dayLabel     = document.getElementById("rdDayLabel");
+  var gospelBox    = document.getElementById("rdGospelBox");
+  var gospelRef    = document.getElementById("rdGospelRef");
+  var gospelRefMal = document.getElementById("rdGospelRefMal");
+  var status       = document.getElementById("rdStatus");
+  var expand       = document.getElementById("rdExpand");
+  var more         = document.getElementById("rdMore");
   if (!dayLabel) return;
 
   function fail() {
@@ -1125,21 +1143,34 @@ function initReading() {
     status.textContent = "";
     if (!items || !items.length) { status.textContent = "No reading data available for today."; return; }
 
-    dayLabel.textContent = items[0].DayDescription_Eng || items[0].SeasonName_Eng_Full || "";
+    dayLabel.textContent = [items[0].DayDescription_Eng, items[0].DayDescription_Mal]
+      .filter(Boolean).join("\n") || (items[0].SeasonName_Eng_Full || "");
 
     var gospel = readingFieldRows(items[0], false).filter(function (r) { return r.label === "Gospel"; })[0];
     if (gospel) {
-      gospelRef.textContent = gospel.ref + (gospel.title ? " (" + gospel.title + ")" : "");
+      gospelRef.textContent = readingLine(gospel.ref, gospel.title);
+      gospelRefMal.textContent = readingLine(gospel.refMal, gospel.titleMal);
       gospelBox.hidden = false;
     }
 
     var rows = [];
     items.forEach(function (item, i) {
       if (items.length > 1) {
-        rows.push('<div class="rd-row rd-row-heading">' + escapeHtml(item.DayDescription_Eng || item.SeasonName_Eng_Full || "") + '</div>');
+        var heading = [item.DayDescription_Eng, item.DayDescription_Mal].filter(Boolean).join(" · ");
+        rows.push('<div class="rd-row rd-row-heading">' + escapeHtml(heading) + '</div>');
       }
       readingFieldRows(item, i === 0).forEach(function (r) {
-        rows.push('<div class="rd-row"><span class="rd-row-label">' + escapeHtml(r.label) + '</span><span>' + escapeHtml(r.ref) + (r.title ? " (" + escapeHtml(r.title) + ")" : "") + '</span></div>');
+        var eng = escapeHtml(readingLine(r.ref, r.title));
+        var mal = escapeHtml(readingLine(r.refMal, r.titleMal));
+        rows.push(
+          '<div class="rd-row">' +
+            '<span class="rd-row-label">' + escapeHtml(r.label) + '</span>' +
+            '<div class="rd-row-text">' +
+              '<span class="rd-row-eng">' + eng + '</span>' +
+              (mal ? '<span class="rd-row-mal" lang="ml">' + mal + '</span>' : '') +
+            '</div>' +
+          '</div>'
+        );
       });
     });
     if (rows.length) { more.innerHTML = rows.join(""); expand.hidden = false; }

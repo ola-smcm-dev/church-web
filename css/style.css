@@ -1166,7 +1166,7 @@ body.sticky-visible .hero-nav-drawer { top: calc(var(--topbar-height) + 62px); }
 /* ── Left col — Today's Reading (2026-09-28) ── */
 .hg-reading { background: var(--white); border-top: 1px solid var(--cream-dark); padding: 1.5rem 1.75rem; }
 
-.rd-daylabel { text-align: center; font-style: italic; color: var(--text-muted); font-size: .85rem; margin: 0 0 .8rem; }
+.rd-daylabel { text-align: center; font-style: italic; color: var(--text-muted); font-size: .85rem; margin: 0 0 .8rem; white-space: pre-line; }
 
 .rd-gospel {
   background: var(--cream);
@@ -1177,6 +1177,8 @@ body.sticky-visible .hero-nav-drawer { top: calc(var(--topbar-height) + 62px); }
 
 .rd-gospel-label { display: block; font-size: .68rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: var(--gold-dark); margin-bottom: .2rem; }
 .rd-gospel-ref   { font-family: var(--font-heading); font-size: 1.02rem; color: var(--navy); }
+.rd-gospel-ref-mal { display: block; font-size: .9rem; color: var(--text-muted); margin-top: .2rem; }
+.rd-gospel-ref-mal:empty { display: none; }
 
 .rd-status { text-align: center; font-size: .82rem; color: var(--text-muted); margin: .6rem 0 0; }
 .rd-status:empty { display: none; }
@@ -1188,6 +1190,8 @@ body.sticky-visible .hero-nav-drawer { top: calc(var(--topbar-height) + 62px); }
 .rd-more { margin-top: .75rem; display: flex; flex-direction: column; gap: .5rem; text-align: left; }
 .rd-row { display: flex; gap: .6rem; font-size: .85rem; }
 .rd-row-label { flex: none; width: 110px; font-weight: 700; color: var(--text-muted); }
+.rd-row-text { display: flex; flex-direction: column; gap: .15rem; }
+.rd-row-mal { color: var(--text-muted); font-size: .82rem; }
 .rd-row-heading {
   font-weight: 700;
   color: var(--navy);
