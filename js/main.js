@@ -1039,52 +1039,30 @@ function loadEventsList(onData) {
 }
 
 /* ─────────────────────────────────────────────────────
-   SYRO MALABAR DAILY READINGS — shared fetch, used by
-   Today's Reading (initReading, home page) and the full
-   calendar's day-detail popup (initEvents, calendar.html).
+   SYRO MALABAR DAILY READINGS — Today's Reading (home page).
 
-   Fetched via the Media Apps Script (?action=readings&date=
-   YYYY-MM-DD), which proxies syrocalendar.com server-side —
-   a direct browser fetch to syrocalendar.com is blocked by
-   CORS, which is why this used to fail silently.
+   Uses SyroCalendar's own official client-side widget (script
+   tag loaded in index.html's <head> + GetLiturgicalReadingsJSON(),
+   per https://syrocalendar.com/api/liturgical-bible-readings/ —
+   registered for olasyromalabarct.org). This widget only ever
+   covers TODAY — there's no documented arbitrary-date lookup —
+   which is why there's no date picker here (see calendar.html's
+   day-detail popup, which links out to SyroCalendar.com instead
+   for other dates).
+
+   A day can have more than one reading set (e.g. a weekday plus
+   an overlapping feast), so GetLiturgicalReadingsJSON() always
+   returns an array; render() below handles one item or several.
    ───────────────────────────────────────────────────── */
-
-// Extract readable text from a reading field (string or object)
-function readingText(r) {
-  if (!r) return null;
-  if (typeof r === "string") return r;
-  var ref   = r.Ref   || r.ref   || r.Reference || "";
-  var title = r.Title || r.title || r.Name      || "";
-  return [title, ref ? "(" + ref + ")" : ""].filter(Boolean).join(" ") || null;
-}
-
-// Turns the raw syrocalendar.com JSON into { dayText, rows: [{label,text}] }
-function parseReadingsData(data) {
-  var dayDesc = data.DayDescription;
-  var dayText = dayDesc ? (typeof dayDesc === "string" ? dayDesc : (dayDesc.English || dayDesc.Eng || "")) : "";
-  var rows = [
-    { key: "Reading1",      label: "First Reading"  },
-    { key: "Reading2",      label: "Second Reading" },
-    { key: "Reading3",      label: "Third Reading"  },
-    { key: "ReadingGospel", label: "Gospel"         }
-  ].map(function (r) {
-    return { label: r.label, text: readingText(data[r.key]) };
-  }).filter(function (r) { return r.text; });
-  return { dayText: dayText, rows: rows };
-}
-
-function fetchReadings(dateStr, onSuccess, onError) {
-  if (!CONFIG.mediaApiUrl) { onError(); return; }
-  fetch(CONFIG.mediaApiUrl + "?action=readings&date=" + dateStr)
-    .then(function (res) {
-      if (!res.ok) throw new Error(res.status);
-      return res.json();
-    })
-    .then(function (data) {
-      if (!data || !data.ok) throw new Error((data && data.error) || "Bad response");
-      onSuccess(parseReadingsData(data.reading || {}));
-    })
-    .catch(onError);
+function readingFieldRows(item, skipGospel) {
+  return [
+    ["Reading1_Eng",      "Reading1_Title_Eng",      "First Reading"],
+    ["Reading2_Eng",      "Reading2_Title_Eng",      "Second Reading"],
+    ["Reading3_Eng",      "Reading3_Title_Eng",      "Third Reading"],
+    ["ReadingGospal_Eng", "ReadingGospal_Title_Eng", "Gospel"]
+  ].filter(function (f) { return !(skipGospel && f[2] === "Gospel"); })
+   .map(function (f) { return { label: f[2], ref: item[f[0]], title: item[f[1]] }; })
+   .filter(function (r) { return r.ref; });
 }
 
 /* ─────────────────────────────────────────────────────
@@ -1126,61 +1104,62 @@ function initUpcoming() {
 }
 
 /* ─────────────────────────────────────────────────────
-   HOME PAGE — Today's Reading (date-picker driven)
+   HOME PAGE — Today's Reading (SyroCalendar widget driven)
    ───────────────────────────────────────────────────── */
 function initReading() {
-  var dateInput = document.getElementById("rdDateInput");
   var dayLabel  = document.getElementById("rdDayLabel");
   var gospelBox = document.getElementById("rdGospelBox");
   var gospelRef = document.getElementById("rdGospelRef");
   var status    = document.getElementById("rdStatus");
   var expand    = document.getElementById("rdExpand");
   var more      = document.getElementById("rdMore");
-  if (!dateInput) return;
+  if (!dayLabel) return;
 
-  function pad(n) { return n < 10 ? "0" + n : "" + n; }
-  function todayStr() {
-    var d = new Date();
-    return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+  function fail() {
+    status.innerHTML = 'Could not load readings. <a href="https://syrocalendar.com" target="_blank" rel="noopener">Visit SyroCalendar.com &#8594;</a>';
   }
 
-  function load(dateStr) {
-    dayLabel.textContent = "";
-    gospelBox.hidden = true;
-    expand.hidden = true;
-    more.innerHTML = "";
-    status.textContent = "Loading readings…";
+  if (typeof GetLiturgicalReadingsJSON !== "function") { fail(); return; }
 
-    fetchReadings(dateStr, function (parsed) {
-      status.textContent = "";
-      if (parsed.dayText) dayLabel.textContent = parsed.dayText;
+  function render(items) {
+    status.textContent = "";
+    if (!items || !items.length) { status.textContent = "No reading data available for today."; return; }
 
-      var gospelRow = null, otherRows = [];
-      parsed.rows.forEach(function (r) {
-        if (r.label === "Gospel") gospelRow = r; else otherRows.push(r);
+    dayLabel.textContent = items[0].DayDescription_Eng || items[0].SeasonName_Eng_Full || "";
+
+    var gospel = readingFieldRows(items[0], false).filter(function (r) { return r.label === "Gospel"; })[0];
+    if (gospel) {
+      gospelRef.textContent = gospel.ref + (gospel.title ? " (" + gospel.title + ")" : "");
+      gospelBox.hidden = false;
+    }
+
+    var rows = [];
+    items.forEach(function (item, i) {
+      if (items.length > 1) {
+        rows.push('<div class="rd-row rd-row-heading">' + escapeHtml(item.DayDescription_Eng || item.SeasonName_Eng_Full || "") + '</div>');
+      }
+      readingFieldRows(item, i === 0).forEach(function (r) {
+        rows.push('<div class="rd-row"><span class="rd-row-label">' + escapeHtml(r.label) + '</span><span>' + escapeHtml(r.ref) + (r.title ? " (" + escapeHtml(r.title) + ")" : "") + '</span></div>');
       });
-
-      if (gospelRow) {
-        gospelRef.textContent = gospelRow.text;
-        gospelBox.hidden = false;
-      }
-      if (otherRows.length) {
-        more.innerHTML = otherRows.map(function (r) {
-          return '<div class="rd-row"><span class="rd-row-label">' + escapeHtml(r.label) + '</span><span>' + escapeHtml(r.text) + '</span></div>';
-        }).join("");
-        expand.hidden = false;
-      }
-      if (!gospelRow && !otherRows.length) {
-        status.textContent = "No reading data available for this date.";
-      }
-    }, function () {
-      status.innerHTML = 'Could not load readings. <a href="https://syrocalendar.com" target="_blank" rel="noopener">Visit SyroCalendar.com &#8594;</a>';
     });
+    if (rows.length) { more.innerHTML = rows.join(""); expand.hidden = false; }
   }
 
-  dateInput.value = todayStr();
-  dateInput.addEventListener("change", function () { load(dateInput.value || todayStr()); });
-  load(dateInput.value);
+  // The widget script populates its data asynchronously; poll using
+  // SyroCalendar's own documented readiness check until today's data
+  // has actually landed (their recommended pattern), then read it.
+  var tries = 0;
+  (function poll() {
+    var ready = typeof getLoadedDateSyroCalendar === "function" &&
+                typeof getTodaysDateSyroCalendar === "function" &&
+                getLoadedDateSyroCalendar() === getTodaysDateSyroCalendar();
+    if (!ready) {
+      if (++tries > 80) { fail(); return; } // ~20s
+      setTimeout(poll, 250);
+      return;
+    }
+    render(GetLiturgicalReadingsJSON());
+  })();
 }
 
 /* ─────────────────────────────────────────────────────
@@ -1196,8 +1175,6 @@ function initEvents() {
   var detail     = document.getElementById("calDetail");
   var detailDate = document.getElementById("calDetailDate");
   var detailEvts = document.getElementById("calDetailEvents");
-  var rdgStatus  = document.getElementById("calReadingsStatus");
-  var rdgContent = document.getElementById("calReadingsContent");
   var closeBtn   = document.getElementById("calDetailClose");
 
   if (!grid) return;
@@ -1270,28 +1247,8 @@ function initEvents() {
       detailEvts.innerHTML = '<p class="cal-detail-none">No parish events scheduled.</p>';
     }
 
-    // Reset readings panel
-    rdgContent.hidden  = true;
-    rdgContent.innerHTML = "";
-    rdgStatus.textContent = "Loading readings…";
     detail.hidden = false;
     detail.scrollIntoView({ behavior: "smooth", block: "nearest" });
-
-    fetchReadings(dateStr, function (parsed) {
-      rdgStatus.textContent = "";
-      var html = "";
-      if (parsed.dayText) html += '<p class="cal-readings-day">' + escapeHtml(parsed.dayText) + '</p>';
-      parsed.rows.forEach(function (r) {
-        html += '<div class="cal-reading">' +
-          '<span class="cal-reading-label">' + escapeHtml(r.label) + '</span>' +
-          '<span class="cal-reading-ref">' + escapeHtml(r.text) + '</span>' +
-          '</div>';
-      });
-      rdgContent.innerHTML = html || '<p class="cal-detail-none">No reading data available.</p>';
-      rdgContent.hidden = false;
-    }, function () {
-      rdgStatus.innerHTML = 'Could not load readings. <a href="https://syrocalendar.com" target="_blank" rel="noopener">Visit SyroCalendar.com &#8594;</a>';
-    });
   }
 
   // ── Controls ──

@@ -32,6 +32,10 @@
 
   <!-- Stylesheet -->
   <link rel="stylesheet" href="css/style.css">
+
+  <!-- SyroCalendar's official Daily Readings widget script (see
+       Today's Reading card below). Loaded in <head> per their docs. -->
+  <script src="https://syrocalendar.com/API/SyroCalendar.min.1.0.3.js"></script>
 </head>
 <body>
 
@@ -229,18 +233,15 @@
         <p class="up-more"><a href="calendar.html">View full calendar &rarr;</a></p>
       </div>
 
-      <!-- Today's Reading — daily Syro-Malabar Scripture reading, with a
-           date picker to browse any day. Fetched via the Media Apps Script
-           (?action=readings) to avoid the browser-side CORS block that
-           syrocalendar.com's API hits directly. -->
+      <!-- Today's Reading — today's Syro-Malabar Scripture reading, via
+           SyroCalendar's own official client-side widget (script tag in
+           <head> + GetLiturgicalReadingsJSON(), per their API docs). Their
+           API only covers "today" — no arbitrary-date lookup — so there's
+           no date picker here; see calendar.html for other dates. -->
       <div class="hg-reading" id="readingCard" aria-labelledby="reading-heading">
         <div class="hg-section-title">
           <span class="hg-ornament" aria-hidden="true">✦ ✦ ✦</span>
           <h2 id="reading-heading">Today's Reading</h2>
-        </div>
-        <div class="rd-datebar">
-          <label for="rdDateInput" class="visually-hidden">Choose a date</label>
-          <input type="date" id="rdDateInput" class="rd-datepick">
         </div>
         <p class="rd-daylabel" id="rdDayLabel"></p>
         <div class="rd-gospel" id="rdGospelBox" hidden>
@@ -252,6 +253,7 @@
           <summary>View all readings &#9662;</summary>
           <div class="rd-more" id="rdMore"></div>
         </details>
+        <p class="rd-attribution">Powered by <a href="https://syrocalendar.com" target="_blank" rel="noopener">SyroCalendar</a></p>
       </div>
 
       <!-- Clergy & Staff -->
