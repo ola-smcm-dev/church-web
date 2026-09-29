@@ -1158,6 +1158,88 @@ body.sticky-visible .hero-nav-drawer { top: calc(var(--topbar-height) + 62px); }
   margin-bottom: .5rem;
 }
 
+/* ── calendar.html — centers the relocated .hg-events card on its own page ── */
+.calendar-page-wrap { max-width: 640px; }
+
+/* ── Left col — Upcoming Events (2026-09-28, replaces the old month-grid
+   calendar on the home page; the full calendar now lives on calendar.html) ── */
+.hg-upcoming { background: var(--white); border-top: 4px solid var(--gold); padding: 1.5rem 1.75rem; }
+
+.up-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .6rem; }
+
+.up-item {
+  display: flex;
+  align-items: center;
+  gap: .9rem;
+  background: #fff;
+  border: 1px solid var(--cream-dark);
+  border-radius: 10px;
+  padding: .6rem .85rem;
+  box-shadow: 0 1px 4px rgba(26,39,68,.06);
+}
+
+.up-date {
+  flex: none;
+  width: 52px;
+  text-align: center;
+  background: var(--navy);
+  color: var(--gold-light);
+  border-radius: 8px;
+  padding: .35rem 0;
+}
+
+.up-date .mon { display: block; font-size: .62rem; font-weight: 900; letter-spacing: .06em; text-transform: uppercase; }
+.up-date .day { display: block; font-family: var(--font-heading); font-size: 1.15rem; font-weight: 700; line-height: 1.1; }
+
+.up-title { font-size: .92rem; font-weight: 700; color: var(--text); line-height: 1.35; }
+.up-sub   { font-size: .78rem; color: var(--text-muted); margin-top: .1rem; }
+
+.up-empty { text-align: center; font-size: .85rem; color: var(--text-muted); font-style: italic; margin: .5rem 0 0; }
+
+.up-more { text-align: center; margin-top: 1rem; }
+.up-more a { color: var(--gold-dark); font-weight: 700; font-size: .85rem; text-decoration: none; border-bottom: 1px solid var(--gold-dark); padding-bottom: 1px; }
+
+/* ── Left col — Today's Reading (2026-09-28) ── */
+.hg-reading { background: var(--white); border-top: 1px solid var(--cream-dark); padding: 1.5rem 1.75rem; }
+
+.rd-datebar { display: flex; justify-content: center; margin-bottom: .85rem; }
+
+.rd-datepick {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  color: var(--navy);
+  font-size: .92rem;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: .4rem 1.1rem;
+  cursor: pointer;
+  text-align: center;
+}
+
+.rd-daylabel { text-align: center; font-style: italic; color: var(--text-muted); font-size: .85rem; margin: 0 0 .8rem; }
+
+.rd-gospel {
+  background: var(--cream);
+  border-left: 4px solid var(--gold);
+  border-radius: 8px;
+  padding: .8rem 1rem;
+}
+
+.rd-gospel-label { display: block; font-size: .68rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: var(--gold-dark); margin-bottom: .2rem; }
+.rd-gospel-ref   { font-family: var(--font-heading); font-size: 1.02rem; color: var(--navy); }
+
+.rd-status { text-align: center; font-size: .82rem; color: var(--text-muted); margin: .6rem 0 0; }
+.rd-status:empty { display: none; }
+
+.rd-expand { text-align: center; margin-top: .75rem; }
+.rd-expand summary { cursor: pointer; color: var(--gold-dark); font-weight: 700; font-size: .82rem; list-style: none; }
+.rd-expand summary::-webkit-details-marker { display: none; }
+
+.rd-more { margin-top: .75rem; display: flex; flex-direction: column; gap: .5rem; text-align: left; }
+.rd-row { display: flex; gap: .6rem; font-size: .85rem; }
+.rd-row-label { flex: none; width: 110px; font-weight: 700; color: var(--text-muted); }
+
 /* ── Left col — Clergy & Staff ──
    Priest banner (big photo + bio) on top, four portrait cards underneath.
    ≤680px : priest banner stacks (centred), portrait cards go 2 across.
@@ -2900,20 +2982,21 @@ body.subpage {
   .quick-info-row { grid-template-columns: 1fr; padding: 1.5rem 1.25rem; }
 
   /* Lower grid — single column, reordered so Announcements leads (right
-     after the Join Us / Contact Us row), then Posters, Calendar, Clergy,
-     Donate. The desktop two-column split (lg-left: Calendar+Clergy,
-     lg-right: Announcements+Posters+Donate) is why the markup itself
-     stays grouped that way — at this width the two wrapper columns are
-     collapsed with display:contents so their children become direct
-     .lower-grid flex items, reordered with `order` instead of moving
-     markup around. */
+     after the Join Us / Contact Us row), then Posters, Upcoming Events,
+     Today's Reading, Clergy, Donate. The desktop two-column split
+     (lg-left: Upcoming+Reading+Clergy, lg-right: Announcements+Posters+
+     Donate) is why the markup itself stays grouped that way — at this
+     width the two wrapper columns are collapsed with display:contents so
+     their children become direct .lower-grid flex items, reordered with
+     `order` instead of moving markup around. */
   .lower-grid { flex-direction: column; }
   .lg-left, .lg-right { display: contents; }
   #announcements    { order: 1; border-top: 4px solid var(--gold); }
   #hg-posters-cell  { order: 2; border-top: 1px solid var(--cream-dark); }
-  .hg-events        { order: 3; border-top: 4px solid var(--gold); }
-  .hg-clergy        { order: 4; border-top: 1px solid var(--cream-dark); padding: 1.4rem 1.1rem 1.5rem; }
-  #donate           { order: 5; }
+  .hg-upcoming      { order: 3; border-top: 4px solid var(--gold); }
+  .hg-reading       { order: 4; border-top: 1px solid var(--cream-dark); }
+  .hg-clergy        { order: 5; border-top: 1px solid var(--cream-dark); padding: 1.4rem 1.1rem 1.5rem; }
+  #donate           { order: 6; }
 
   .section { padding: 3.5rem 0; }
 

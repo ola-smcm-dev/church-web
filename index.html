@@ -217,30 +217,41 @@
 
     <div class="lg-left">
 
-      <!-- Parish Calendar -->
-      <div class="hg-events" id="events" aria-labelledby="events-heading">
+      <!-- Upcoming Events — next 5 events from the Calendar Events sheet.
+           Full month-grid calendar moved to calendar.html 2026-09-28. -->
+      <div class="hg-upcoming" id="upcomingEvents" aria-labelledby="upcoming-heading">
         <div class="hg-section-title">
           <span class="hg-ornament" aria-hidden="true">✦ ✦ ✦</span>
-          <h2 id="events-heading">Parish Calendar</h2>
+          <h2 id="upcoming-heading">Upcoming Events</h2>
         </div>
-        <div class="cal-header">
-          <button class="cal-nav-btn" id="calPrev" aria-label="Previous month">&#8249;</button>
-          <span class="cal-month-label" id="calMonthLabel"></span>
-          <button class="cal-nav-btn" id="calNext" aria-label="Next month">&#8250;</button>
+        <ul class="up-list" id="upList" aria-live="polite"></ul>
+        <p class="up-empty" id="upEmpty" hidden>No upcoming events at this time.</p>
+        <p class="up-more"><a href="calendar.html">View full calendar &rarr;</a></p>
+      </div>
+
+      <!-- Today's Reading — daily Syro-Malabar Scripture reading, with a
+           date picker to browse any day. Fetched via the Media Apps Script
+           (?action=readings) to avoid the browser-side CORS block that
+           syrocalendar.com's API hits directly. -->
+      <div class="hg-reading" id="readingCard" aria-labelledby="reading-heading">
+        <div class="hg-section-title">
+          <span class="hg-ornament" aria-hidden="true">✦ ✦ ✦</span>
+          <h2 id="reading-heading">Today's Reading</h2>
         </div>
-        <div class="cal-grid" id="calGrid" role="grid" aria-label="Parish calendar"></div>
-        <div class="cal-detail" id="calDetail" hidden>
-          <div class="cal-detail-header">
-            <span class="cal-detail-date" id="calDetailDate"></span>
-            <button class="cal-detail-close" id="calDetailClose" aria-label="Close">&#x2715;</button>
-          </div>
-          <div class="cal-detail-events" id="calDetailEvents"></div>
-          <div class="cal-detail-readings">
-            <h4 class="cal-readings-title">Daily Readings</h4>
-            <div id="calReadingsStatus" class="cal-readings-status"></div>
-            <div id="calReadingsContent" hidden></div>
-          </div>
+        <div class="rd-datebar">
+          <label for="rdDateInput" class="visually-hidden">Choose a date</label>
+          <input type="date" id="rdDateInput" class="rd-datepick">
         </div>
+        <p class="rd-daylabel" id="rdDayLabel"></p>
+        <div class="rd-gospel" id="rdGospelBox" hidden>
+          <span class="rd-gospel-label">Gospel</span>
+          <span class="rd-gospel-ref" id="rdGospelRef"></span>
+        </div>
+        <p class="rd-status" id="rdStatus">Loading readings&hellip;</p>
+        <details class="rd-expand" id="rdExpand" hidden>
+          <summary>View all readings &#9662;</summary>
+          <div class="rd-more" id="rdMore"></div>
+        </details>
       </div>
 
       <!-- Clergy & Staff -->

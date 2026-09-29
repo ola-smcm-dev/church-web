@@ -110,6 +110,8 @@ document.addEventListener("DOMContentLoaded", function () {
   initMapEmbed();
   setFooterYear();
   initAnnouncements();
+  initUpcoming();
+  initReading();
   initEvents();
   initPosters();
   initWhatsAppModal();
@@ -992,7 +994,9 @@ function parseCSVLine(line) {
 }
 
 /* ─────────────────────────────────────────────────────
-   PARISH CALENDAR — monthly grid + Syro Malabar readings
+   CALENDAR EVENTS — shared fetch/cache, used by the home
+   page's Upcoming Events list (initUpcoming, below) and the
+   full month-grid calendar on calendar.html (initEvents).
    ─────────────────────────────────────────────────────
    Sheet format (row 1 = header, ignored):
      Column A: Date        (YYYY-MM-DD)
@@ -1000,10 +1004,189 @@ function parseCSVLine(line) {
      Column C: Time        (e.g. "4:00 PM")
      Column D: Description
      Column E: Active      (Yes / No)
+   ───────────────────────────────────────────────────── */
+var EVENTS_CACHE_KEY = "ola_events_cal_v2";
 
-   On day click: shows parish events + fetches daily readings
-   from syrocalendar.com API (DD-MM-YYYY format).
-   Falls back gracefully if API is blocked by CORS.
+function loadEventsCache() { try { var c = localStorage.getItem(EVENTS_CACHE_KEY); return c ? JSON.parse(c) : null; } catch (e) { return null; } }
+function saveEventsCache(d) { try { localStorage.setItem(EVENTS_CACHE_KEY, JSON.stringify(d)); } catch (e) {} }
+
+function parseEventsCSV(csv) {
+  var lines = csv.trim().split("\n");
+  var list  = [];
+  for (var i = 1; i < lines.length; i++) {
+    var cols   = parseCSVLine(lines[i].trim());
+    var date   = (cols[0] || "").trim();
+    var title  = (cols[1] || "").trim();
+    var time   = (cols[2] || "").trim();
+    var desc   = (cols[3] || "").trim();
+    var active = (cols[4] || "").trim().toLowerCase();
+    if (date && title && active === "yes") list.push({ date: date, title: title, time: time, desc: desc });
+  }
+  return list;
+}
+
+// onData(list) is called once with the cached copy (if any) and again once
+// fresh data arrives — same cache-then-network pattern used elsewhere on
+// this site (announcements, posters, mass times).
+function loadEventsList(onData) {
+  if (!CONFIG.eventsSheetUrl) return;
+  var cached = loadEventsCache();
+  if (cached) onData(cached);
+  fetch(CONFIG.eventsSheetUrl)
+    .then(function (res) { return res.text(); })
+    .then(function (csv) { var fresh = parseEventsCSV(csv); saveEventsCache(fresh); onData(fresh); })
+    .catch(function () {});
+}
+
+/* ─────────────────────────────────────────────────────
+   SYRO MALABAR DAILY READINGS — shared fetch, used by
+   Today's Reading (initReading, home page) and the full
+   calendar's day-detail popup (initEvents, calendar.html).
+
+   Fetched via the Media Apps Script (?action=readings&date=
+   YYYY-MM-DD), which proxies syrocalendar.com server-side —
+   a direct browser fetch to syrocalendar.com is blocked by
+   CORS, which is why this used to fail silently.
+   ───────────────────────────────────────────────────── */
+
+// Extract readable text from a reading field (string or object)
+function readingText(r) {
+  if (!r) return null;
+  if (typeof r === "string") return r;
+  var ref   = r.Ref   || r.ref   || r.Reference || "";
+  var title = r.Title || r.title || r.Name      || "";
+  return [title, ref ? "(" + ref + ")" : ""].filter(Boolean).join(" ") || null;
+}
+
+// Turns the raw syrocalendar.com JSON into { dayText, rows: [{label,text}] }
+function parseReadingsData(data) {
+  var dayDesc = data.DayDescription;
+  var dayText = dayDesc ? (typeof dayDesc === "string" ? dayDesc : (dayDesc.English || dayDesc.Eng || "")) : "";
+  var rows = [
+    { key: "Reading1",      label: "First Reading"  },
+    { key: "Reading2",      label: "Second Reading" },
+    { key: "Reading3",      label: "Third Reading"  },
+    { key: "ReadingGospel", label: "Gospel"         }
+  ].map(function (r) {
+    return { label: r.label, text: readingText(data[r.key]) };
+  }).filter(function (r) { return r.text; });
+  return { dayText: dayText, rows: rows };
+}
+
+function fetchReadings(dateStr, onSuccess, onError) {
+  if (!CONFIG.mediaApiUrl) { onError(); return; }
+  fetch(CONFIG.mediaApiUrl + "?action=readings&date=" + dateStr)
+    .then(function (res) {
+      if (!res.ok) throw new Error(res.status);
+      return res.json();
+    })
+    .then(function (data) {
+      if (!data || !data.ok) throw new Error((data && data.error) || "Bad response");
+      onSuccess(parseReadingsData(data.reading || {}));
+    })
+    .catch(onError);
+}
+
+/* ─────────────────────────────────────────────────────
+   HOME PAGE — Upcoming Events (next 5 events, any category)
+   ───────────────────────────────────────────────────── */
+function initUpcoming() {
+  var list  = document.getElementById("upList");
+  var empty = document.getElementById("upEmpty");
+  if (!list) return;
+
+  var MON = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  function pad(n) { return n < 10 ? "0" + n : "" + n; }
+
+  function render(all) {
+    var today    = new Date();
+    var todayStr = today.getFullYear() + "-" + pad(today.getMonth() + 1) + "-" + pad(today.getDate());
+    var upcoming = all
+      .filter(function (ev) { return ev.date >= todayStr; })
+      .sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; })
+      .slice(0, 5);
+
+    if (!upcoming.length) {
+      list.innerHTML = "";
+      empty.hidden = false;
+      return;
+    }
+    empty.hidden = true;
+    list.innerHTML = upcoming.map(function (ev) {
+      var d = new Date(ev.date + "T00:00:00");
+      return '<li class="up-item">' +
+        '<div class="up-date"><span class="mon">' + MON[d.getMonth()] + '</span><span class="day">' + pad(d.getDate()) + '</span></div>' +
+        '<div><div class="up-title">' + escapeHtml(ev.title) + '</div>' +
+        (ev.time ? '<div class="up-sub">' + escapeHtml(ev.time) + '</div>' : '') +
+        '</div></li>';
+    }).join("");
+  }
+
+  loadEventsList(render);
+}
+
+/* ─────────────────────────────────────────────────────
+   HOME PAGE — Today's Reading (date-picker driven)
+   ───────────────────────────────────────────────────── */
+function initReading() {
+  var dateInput = document.getElementById("rdDateInput");
+  var dayLabel  = document.getElementById("rdDayLabel");
+  var gospelBox = document.getElementById("rdGospelBox");
+  var gospelRef = document.getElementById("rdGospelRef");
+  var status    = document.getElementById("rdStatus");
+  var expand    = document.getElementById("rdExpand");
+  var more      = document.getElementById("rdMore");
+  if (!dateInput) return;
+
+  function pad(n) { return n < 10 ? "0" + n : "" + n; }
+  function todayStr() {
+    var d = new Date();
+    return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+  }
+
+  function load(dateStr) {
+    dayLabel.textContent = "";
+    gospelBox.hidden = true;
+    expand.hidden = true;
+    more.innerHTML = "";
+    status.textContent = "Loading readings…";
+
+    fetchReadings(dateStr, function (parsed) {
+      status.textContent = "";
+      if (parsed.dayText) dayLabel.textContent = parsed.dayText;
+
+      var gospelRow = null, otherRows = [];
+      parsed.rows.forEach(function (r) {
+        if (r.label === "Gospel") gospelRow = r; else otherRows.push(r);
+      });
+
+      if (gospelRow) {
+        gospelRef.textContent = gospelRow.text;
+        gospelBox.hidden = false;
+      }
+      if (otherRows.length) {
+        more.innerHTML = otherRows.map(function (r) {
+          return '<div class="rd-row"><span class="rd-row-label">' + escapeHtml(r.label) + '</span><span>' + escapeHtml(r.text) + '</span></div>';
+        }).join("");
+        expand.hidden = false;
+      }
+      if (!gospelRow && !otherRows.length) {
+        status.textContent = "No reading data available for this date.";
+      }
+    }, function () {
+      status.innerHTML = 'Could not load readings. <a href="https://syrocalendar.com" target="_blank" rel="noopener">Visit SyroCalendar.com &#8594;</a>';
+    });
+  }
+
+  dateInput.value = todayStr();
+  dateInput.addEventListener("change", function () { load(dateInput.value || todayStr()); });
+  load(dateInput.value);
+}
+
+/* ─────────────────────────────────────────────────────
+   CALENDAR PAGE — full month grid + day-detail popup
+   (calendar.html only; a plain `if (!grid) return` keeps
+   this a no-op on every other page)
    ───────────────────────────────────────────────────── */
 function initEvents() {
   var grid       = document.getElementById("calGrid");
@@ -1068,15 +1251,6 @@ function initEvents() {
     });
   }
 
-  // ── Extract readable text from a reading field (string or object) ──
-  function readingText(r) {
-    if (!r) return null;
-    if (typeof r === "string") return r;
-    var ref   = r.Ref   || r.ref   || r.Reference || "";
-    var title = r.Title || r.title || r.Name      || "";
-    return [title, ref ? "(" + ref + ")" : ""].filter(Boolean).join(" ") || null;
-  }
-
   // ── Open day detail panel ──
   function openDay(dateStr) {
     var d     = new Date(dateStr + "T00:00:00");
@@ -1099,48 +1273,25 @@ function initEvents() {
     // Reset readings panel
     rdgContent.hidden  = true;
     rdgContent.innerHTML = "";
-    rdgStatus.textContent = "Loading readings\u2026";
+    rdgStatus.textContent = "Loading readings…";
     detail.hidden = false;
     detail.scrollIntoView({ behavior: "smooth", block: "nearest" });
 
-    // Fetch Syro Malabar daily readings
-    var parts   = dateStr.split("-");
-    var apiDate = parts[2] + "-" + parts[1] + "-" + parts[0]; // DD-MM-YYYY
-    fetch("https://syrocalendar.com/SyroMalabarCalendar/?Mode=JSON&Type=DailyReadings&Date=" + apiDate)
-      .then(function (res) {
-        if (!res.ok) throw new Error(res.status);
-        return res.json();
-      })
-      .then(function (data) {
-        rdgStatus.textContent = "";
-        var html = "";
-
-        var dayDesc = data.DayDescription;
-        if (dayDesc) {
-          var descText = typeof dayDesc === "string" ? dayDesc : (dayDesc.English || dayDesc.Eng || "");
-          if (descText) html += '<p class="cal-readings-day">' + escapeHtml(descText) + '</p>';
-        }
-
-        [
-          { key: "Reading1",      label: "First Reading"  },
-          { key: "Reading2",      label: "Second Reading" },
-          { key: "Reading3",      label: "Third Reading"  },
-          { key: "ReadingGospel", label: "Gospel"         }
-        ].forEach(function (r) {
-          var text = readingText(data[r.key]);
-          if (!text) return;
-          html += '<div class="cal-reading">' +
-            '<span class="cal-reading-label">' + r.label + '</span>' +
-            '<span class="cal-reading-ref">' + escapeHtml(text) + '</span>' +
-            '</div>';
-        });
-
-        rdgContent.innerHTML = html || '<p class="cal-detail-none">No reading data available.</p>';
-        rdgContent.hidden = false;
-      })
-      .catch(function () {
-        rdgStatus.innerHTML = 'Could not load readings. <a href="https://syrocalendar.com" target="_blank" rel="noopener">Visit SyroCalendar.com &#8594;</a>';
+    fetchReadings(dateStr, function (parsed) {
+      rdgStatus.textContent = "";
+      var html = "";
+      if (parsed.dayText) html += '<p class="cal-readings-day">' + escapeHtml(parsed.dayText) + '</p>';
+      parsed.rows.forEach(function (r) {
+        html += '<div class="cal-reading">' +
+          '<span class="cal-reading-label">' + escapeHtml(r.label) + '</span>' +
+          '<span class="cal-reading-ref">' + escapeHtml(r.text) + '</span>' +
+          '</div>';
       });
+      rdgContent.innerHTML = html || '<p class="cal-detail-none">No reading data available.</p>';
+      rdgContent.hidden = false;
+    }, function () {
+      rdgStatus.innerHTML = 'Could not load readings. <a href="https://syrocalendar.com" target="_blank" rel="noopener">Visit SyroCalendar.com &#8594;</a>';
+    });
   }
 
   // ── Controls ──
@@ -1155,22 +1306,6 @@ function initEvents() {
     detail.hidden = true; renderCalendar();
   });
 
-  // ── CSV parsing ──
-  function parseCSV(csv) {
-    var lines = csv.trim().split("\n");
-    var list  = [];
-    for (var i = 1; i < lines.length; i++) {
-      var cols   = parseCSVLine(lines[i].trim());
-      var date   = (cols[0] || "").trim();
-      var title  = (cols[1] || "").trim();
-      var time   = (cols[2] || "").trim();
-      var desc   = (cols[3] || "").trim();
-      var active = (cols[4] || "").trim().toLowerCase();
-      if (date && title && active === "yes") list.push({ date: date, title: title, time: time, desc: desc });
-    }
-    return list;
-  }
-
   function buildMap(list) {
     eventsMap = {};
     list.forEach(function (ev) {
@@ -1180,22 +1315,9 @@ function initEvents() {
     renderCalendar();
   }
 
-  // ── localStorage cache ──
-  var CACHE_KEY = "ola_events_cal_v2";
-  function loadCache() { try { var c = localStorage.getItem(CACHE_KEY); return c ? JSON.parse(c) : null; } catch (e) { return null; } }
-  function saveCache(d) { try { localStorage.setItem(CACHE_KEY, JSON.stringify(d)); } catch (e) {} }
-
   // Initial render (no events yet)
   renderCalendar();
-  if (!CONFIG.eventsSheetUrl) return;
-
-  var cached = loadCache();
-  if (cached) buildMap(cached);
-
-  fetch(CONFIG.eventsSheetUrl)
-    .then(function (res) { return res.text(); })
-    .then(function (csv) { var fresh = parseCSV(csv); saveCache(fresh); buildMap(fresh); })
-    .catch(function () {});
+  loadEventsList(buildMap);
 }
 
 /* ─────────────────────────────────────────────────────
