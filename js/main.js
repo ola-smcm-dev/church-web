@@ -1079,13 +1079,21 @@ function createReadingCard(els) {
     var entry = entries[activeTab];
     if (!entry) return;
 
-    els.badge.hidden = !entry.important;
-
     if (activeLang === "ml") {
+      // Malayalam has no translated Season/Celebration/readings yet — hide
+      // all of that (rather than showing it in English) so the card just
+      // shows the "coming soon" placeholder on its own.
+      els.season.hidden = true;
+      els.badge.hidden = true;
+      els.tabs.hidden = true;
       els.body.innerHTML = '<p class="rd-ml-soon">Malayalam readings will be available soon.</p>';
       els.notes.hidden = true;
       return;
     }
+
+    els.season.hidden = false;
+    els.badge.hidden = !entry.important;
+    els.tabs.hidden = entries.length <= 1;
 
     var readings = entry.readings || [];
     els.body.innerHTML = readings.map(function (r, i) {
