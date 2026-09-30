@@ -111,7 +111,7 @@ document.addEventListener("DOMContentLoaded", function () {
   setFooterYear();
   initAnnouncements();
   initUpcoming();
-  initReading();
+  initHomeReading();
   initEvents();
   initPosters();
   initWhatsAppModal();
@@ -1039,47 +1039,182 @@ function loadEventsList(onData) {
 }
 
 /* ─────────────────────────────────────────────────────
-   SYRO MALABAR DAILY READINGS — Today's Reading (home page).
+   SYRO MALABAR DAILY READINGS — shared card controller.
 
-   Uses SyroCalendar's own official client-side widget (script
-   tag loaded in index.html's <head> + GetLiturgicalReadingsJSON(),
-   per https://syrocalendar.com/api/liturgical-bible-readings/ —
-   registered for olasyromalabarct.org). This widget only ever
-   covers TODAY — there's no documented arbitrary-date lookup —
-   which is why there's no date picker here (see calendar.html's
-   day-detail popup, which links out to SyroCalendar.com instead
-   for other dates).
-
-   A day can have more than one reading set (e.g. a weekday plus
-   an overlapping feast), so GetLiturgicalReadingsJSON() always
-   returns an array; render() below handles one item or several.
-
-   SyroCalendar's own raw data (confirmed 2026-09-29 by comparing
-   against their site's Set1/Set2/SetToUse response) always has two
-   parallel liturgical calendars running — Set 1 and Set 2 — and
-   GetLiturgicalReadingsJSON() already returns only whichever one is
-   currently active (Set 2, as of this writing), so no extra
-   filtering is needed here; the "current season only" requirement
-   is handled by SyroCalendar's own script. Each field also comes in
-   an _Eng and a _Mal version — both are shown, English first.
+   Sources data from the Panchangam-derived Google Sheet via its
+   own standalone Apps Script (ReadingsLookup.gs) — NOT SyroCalendar
+   — so it works for any date in the sheet's range, not just today.
+   Used both by the home page's "Today's Reading" card (initHomeReading,
+   always loads today's date, no further interaction) and by
+   calendar.html's day-popup (initEvents, loads whatever date the
+   visitor clicks) — same markup, same rendering logic, one
+   implementation shared between the two call sites.
    ───────────────────────────────────────────────────── */
-function readingFieldRows(item, skipGospel) {
-  return [
-    ["Reading1_Eng",      "Reading1_Title_Eng",      "Reading1_Mal",      "Reading1_Title_Mal",      "First Reading"],
-    ["Reading2_Eng",      "Reading2_Title_Eng",      "Reading2_Mal",      "Reading2_Title_Mal",      "Second Reading"],
-    ["Reading3_Eng",      "Reading3_Title_Eng",      "Reading3_Mal",      "Reading3_Title_Mal",      "Third Reading"],
-    ["ReadingGospal_Eng", "ReadingGospal_Title_Eng", "ReadingGospal_Mal", "ReadingGospal_Title_Mal", "Gospel"]
-  ].filter(function (f) { return !(skipGospel && f[4] === "Gospel"); })
-   .map(function (f) {
-     return { label: f[4], ref: item[f[0]], title: item[f[1]], refMal: item[f[2]], titleMal: item[f[3]] };
-   })
-   .filter(function (r) { return r.ref; });
+var READINGS_URL = "https://script.google.com/macros/s/AKfycbzFOCM_Ze5FPT0qlbzywP7lYL5Lsec3-RB6JaHN3jH4vF6P3-nUc1fnMooAx63VfjgF/exec";
+var READING_SLOT_LABELS = { Law: "Law", Prophets: "Prophets", Epistle: "Epistle", Gospel: "Gospel" };
+
+function createReadingCard(els) {
+  if (!els.card) return { load: function () {} };
+
+  var cache      = {};
+  var reqSeq     = 0;   // guards against a slow earlier fetch overwriting a later render
+  var entries    = [];
+  var activeTab  = 0;
+  var activeLang = "en";
+
+  function showStatus(msg) {
+    els.card.hidden = true;
+    if (els.fallback) els.fallback.hidden = true;
+    els.status.hidden = false;
+    els.status.textContent = msg;
+  }
+
+  function showFallback() {
+    els.card.hidden = true;
+    els.status.hidden = true;
+    if (els.fallback) els.fallback.hidden = false;
+  }
+
+  function renderBody() {
+    var entry = entries[activeTab];
+    if (!entry) return;
+
+    els.badge.hidden = !entry.important;
+
+    if (activeLang === "ml") {
+      els.body.innerHTML = '<p class="rd-ml-soon">Malayalam readings will be available soon.</p>';
+      els.notes.hidden = true;
+      return;
+    }
+
+    var readings = entry.readings || [];
+    els.body.innerHTML = readings.map(function (r, i) {
+      var slotName = READING_SLOT_LABELS[r.slot] || r.slot;
+      var label = "Reading " + (i + 1) + " (" + slotName + ")";
+      return '<div class="rd-row">' +
+        '<span class="rd-row-label">' + escapeHtml(label) + '</span>' +
+        '<span class="rd-row-text"><strong>' + escapeHtml(r.ref || "") + '</strong>' +
+        (r.title ? '<span>' + escapeHtml(r.title) + '</span>' : '') +
+        '</span></div>';
+    }).join("");
+
+    if (entry.notes) {
+      els.notes.hidden = false;
+      els.notes.textContent = "Note: " + entry.notes;
+    } else {
+      els.notes.hidden = true;
+    }
+  }
+
+  function render(data, mySeq) {
+    if (mySeq !== reqSeq) return; // a newer load happened while this was in flight
+
+    if (!data || !data.entries || !data.entries.length) {
+      showFallback();
+      return;
+    }
+
+    entries    = data.entries;
+    activeTab  = 0;
+    activeLang = "en";
+    if (els.langToggle) {
+      els.langToggle.querySelectorAll(".rd-lang-btn").forEach(function (b) {
+        b.classList.toggle("is-active", b.dataset.lang === "en");
+      });
+    }
+
+    els.status.hidden = true;
+    if (els.fallback) els.fallback.hidden = true;
+    els.card.hidden = false;
+
+    els.season.textContent = data.season ? "Season of " + data.season : "";
+
+    els.tabs.innerHTML = "";
+    if (entries.length > 1) {
+      els.tabs.hidden = false;
+      entries.forEach(function (entry, i) {
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "rd-tab-btn" + (i === 0 ? " is-active" : "");
+        btn.setAttribute("role", "tab");
+        btn.setAttribute("aria-selected", i === 0 ? "true" : "false");
+        btn.textContent = entry.celebration || "Celebration";
+        btn.addEventListener("click", function () {
+          activeTab = i;
+          els.tabs.querySelectorAll(".rd-tab-btn").forEach(function (b, bi) {
+            b.classList.toggle("is-active", bi === i);
+            b.setAttribute("aria-selected", bi === i ? "true" : "false");
+          });
+          renderBody();
+        });
+        els.tabs.appendChild(btn);
+      });
+    } else {
+      els.tabs.hidden = true;
+    }
+
+    renderBody();
+  }
+
+  function load(dateStr) {
+    var mySeq = ++reqSeq;
+    showStatus("Loading readings…");
+
+    if (cache[dateStr]) {
+      render(cache[dateStr], mySeq);
+      return;
+    }
+
+    fetch(READINGS_URL + "?date=" + encodeURIComponent(dateStr))
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        cache[dateStr] = data;
+        render(data, mySeq);
+      })
+      .catch(function () {
+        if (mySeq !== reqSeq) return;
+        showFallback();
+      });
+  }
+
+  if (els.langToggle) {
+    els.langToggle.querySelectorAll(".rd-lang-btn").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        activeLang = btn.dataset.lang;
+        els.langToggle.querySelectorAll(".rd-lang-btn").forEach(function (b) {
+          b.classList.toggle("is-active", b === btn);
+        });
+        renderBody();
+      });
+    });
+  }
+
+  return { load: load };
 }
 
-// "ref (title)" for one language, or "" if there's no ref for it
-function readingLine(ref, title) {
-  if (!ref) return "";
-  return ref + (title ? " (" + title + ")" : "");
+/* ─────────────────────────────────────────────────────
+   HOME PAGE — Today's Reading (Panchangam sheet, always today)
+   ───────────────────────────────────────────────────── */
+function initHomeReading() {
+  var card = document.getElementById("rdCard");
+  if (!card) return;
+
+  var readingCard = createReadingCard({
+    card:       card,
+    season:     document.getElementById("rdSeason"),
+    badge:      document.getElementById("rdBadge"),
+    langToggle: document.getElementById("rdLangToggle"),
+    tabs:       document.getElementById("rdTabs"),
+    body:       document.getElementById("rdBody"),
+    notes:      document.getElementById("rdNotes"),
+    status:     document.getElementById("rdStatus"),
+    fallback:   document.getElementById("rdFallback")
+  });
+
+  function pad(n) { return n < 10 ? "0" + n : "" + n; }
+  var t = new Date();
+  var todayStr = t.getFullYear() + "-" + pad(t.getMonth() + 1) + "-" + pad(t.getDate());
+  readingCard.load(todayStr);
 }
 
 /* ─────────────────────────────────────────────────────
@@ -1121,79 +1256,6 @@ function initUpcoming() {
 }
 
 /* ─────────────────────────────────────────────────────
-   HOME PAGE — Today's Reading (SyroCalendar widget driven)
-   ───────────────────────────────────────────────────── */
-function initReading() {
-  var dayLabel     = document.getElementById("rdDayLabel");
-  var gospelBox    = document.getElementById("rdGospelBox");
-  var gospelRef    = document.getElementById("rdGospelRef");
-  var gospelRefMal = document.getElementById("rdGospelRefMal");
-  var status       = document.getElementById("rdStatus");
-  var expand       = document.getElementById("rdExpand");
-  var more         = document.getElementById("rdMore");
-  if (!dayLabel) return;
-
-  function fail() {
-    status.innerHTML = 'Could not load readings. <a href="https://syrocalendar.com" target="_blank" rel="noopener">Visit SyroCalendar.com &#8594;</a>';
-  }
-
-  if (typeof GetLiturgicalReadingsJSON !== "function") { fail(); return; }
-
-  function render(items) {
-    status.textContent = "";
-    if (!items || !items.length) { status.textContent = "No reading data available for today."; return; }
-
-    dayLabel.textContent = [items[0].DayDescription_Eng, items[0].DayDescription_Mal]
-      .filter(Boolean).join("\n") || (items[0].SeasonName_Eng_Full || "");
-
-    var gospel = readingFieldRows(items[0], false).filter(function (r) { return r.label === "Gospel"; })[0];
-    if (gospel) {
-      gospelRef.textContent = readingLine(gospel.ref, gospel.title);
-      gospelRefMal.textContent = readingLine(gospel.refMal, gospel.titleMal);
-      gospelBox.hidden = false;
-    }
-
-    var rows = [];
-    items.forEach(function (item, i) {
-      if (items.length > 1) {
-        var heading = [item.DayDescription_Eng, item.DayDescription_Mal].filter(Boolean).join(" · ");
-        rows.push('<div class="rd-row rd-row-heading">' + escapeHtml(heading) + '</div>');
-      }
-      readingFieldRows(item, i === 0).forEach(function (r) {
-        var eng = escapeHtml(readingLine(r.ref, r.title));
-        var mal = escapeHtml(readingLine(r.refMal, r.titleMal));
-        rows.push(
-          '<div class="rd-row">' +
-            '<span class="rd-row-label">' + escapeHtml(r.label) + '</span>' +
-            '<div class="rd-row-text">' +
-              '<span class="rd-row-eng">' + eng + '</span>' +
-              (mal ? '<span class="rd-row-mal" lang="ml">' + mal + '</span>' : '') +
-            '</div>' +
-          '</div>'
-        );
-      });
-    });
-    if (rows.length) { more.innerHTML = rows.join(""); expand.hidden = false; }
-  }
-
-  // The widget script populates its data asynchronously; poll using
-  // SyroCalendar's own documented readiness check until today's data
-  // has actually landed (their recommended pattern), then read it.
-  var tries = 0;
-  (function poll() {
-    var ready = typeof getLoadedDateSyroCalendar === "function" &&
-                typeof getTodaysDateSyroCalendar === "function" &&
-                getLoadedDateSyroCalendar() === getTodaysDateSyroCalendar();
-    if (!ready) {
-      if (++tries > 80) { fail(); return; } // ~20s
-      setTimeout(poll, 250);
-      return;
-    }
-    render(GetLiturgicalReadingsJSON());
-  })();
-}
-
-/* ─────────────────────────────────────────────────────
    CALENDAR PAGE — full month grid + day-detail popup
    (calendar.html only; a plain `if (!grid) return` keeps
    this a no-op on every other page)
@@ -1208,7 +1270,39 @@ function initEvents() {
   var detailEvts = document.getElementById("calDetailEvents");
   var closeBtn   = document.getElementById("calDetailClose");
 
+  // Daily readings (added 2026-09-29)
+  var rdCard     = document.getElementById("rdCard");
+  var rdSeason   = document.getElementById("rdSeason");
+  var rdLangTog  = document.getElementById("rdLangToggle");
+  var rdTabs     = document.getElementById("rdTabs");
+  var rdBody     = document.getElementById("rdBody");
+  var rdNotes    = document.getElementById("rdNotes");
+  var rdStatus   = document.getElementById("rdStatus");
+  var rdFallback = document.getElementById("rdFallback");
+  var rdBadge    = document.getElementById("rdBadge");
+
   if (!grid) return;
+
+  var readingCard = createReadingCard({
+    card:       rdCard,
+    season:     rdSeason,
+    badge:      rdBadge,
+    langToggle: rdLangTog,
+    tabs:       rdTabs,
+    body:       rdBody,
+    notes:      rdNotes,
+    status:     rdStatus,
+    fallback:   rdFallback
+  });
+
+  // Days of obligation / important feasts, for the month-grid highlight.
+  // Derived from the same verified liturgical dataset as the readings sheet
+  // (see build_sheet.py's clean_notes()) — regenerate this list whenever a
+  // new year's Panchangam is processed.
+  var IMPORTANT_DATES = {
+    "2025-12-25": 1, "2026-01-06": 1, "2026-05-14": 1, "2026-06-29": 1,
+    "2026-07-03": 1, "2026-08-15": 1, "2026-12-25": 1
+  };
 
   var today     = new Date();
   var viewYear  = today.getFullYear();
@@ -1238,8 +1332,9 @@ function initEvents() {
       var dateStr = viewYear + "-" + pad(viewMonth + 1) + "-" + pad(day);
       var isToday = viewYear === today.getFullYear() && viewMonth === today.getMonth() && day === today.getDate();
       var evts    = eventsMap[dateStr] || [];
-      var cls     = "cal-day" + (isToday ? " cal-day--today" : "") + (evts.length ? " cal-day--has-events" : "");
-      var ariaLbl = MONTHS[viewMonth] + " " + day + (evts.length ? ", " + evts.length + " event" + (evts.length > 1 ? "s" : "") : "");
+      var isImportant = !!IMPORTANT_DATES[dateStr];
+      var cls     = "cal-day" + (isToday ? " cal-day--today" : "") + (evts.length ? " cal-day--has-events" : "") + (isImportant ? " cal-day--important" : "");
+      var ariaLbl = MONTHS[viewMonth] + " " + day + (evts.length ? ", " + evts.length + " event" + (evts.length > 1 ? "s" : "") : "") + (isImportant ? ", day of obligation" : "");
 
       html += '<div class="' + cls + '" data-date="' + dateStr + '" role="button" tabindex="0" aria-label="' + ariaLbl + '">';
       html += '<span class="cal-day-num">' + day + '</span>';
@@ -1280,6 +1375,8 @@ function initEvents() {
 
     detail.hidden = false;
     detail.scrollIntoView({ behavior: "smooth", block: "nearest" });
+
+    readingCard.load(dateStr);
   }
 
   // ── Controls ──

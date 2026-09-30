@@ -25,17 +25,26 @@
 
   <title>Our Lady Of Assumption — Syro Malabar Catholic Mission, Fairfield CT</title>
 
-  <!-- Google Fonts -->
+  <!-- Google Fonts — loaded non-blocking: the stylesheet swaps in once
+       fetched (media="print" trick) instead of holding up first paint.
+       display=swap in the URL also means text renders immediately in a
+       fallback font rather than waiting invisibly for the web font. -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&display=swap">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet"></noscript>
 
   <!-- Stylesheet -->
   <link rel="stylesheet" href="css/style.css">
 
-  <!-- SyroCalendar's official Daily Readings widget script (see
-       Today's Reading card below). Loaded in <head> per their docs. -->
-  <script src="https://syrocalendar.com/API/SyroCalendar.min.1.0.3.js"></script>
+  <!-- Preload the hero photo so the browser starts fetching it right away
+       instead of waiting to discover it inside css/style.css — this is
+       the page's largest visible element (LCP). type="image/webp" keeps
+       browsers that don't support WebP from preloading a file they won't
+       end up using (see the image-set() fallback in style.css). -->
+  <link rel="preload" as="image" href="images/hero-bg.webp" type="image/webp" fetchpriority="high">
+
 </head>
 <body>
 
@@ -73,7 +82,7 @@
   <div class="sticky-bar" id="stickyBar" aria-hidden="true">
     <div class="sticky-bar-inner">
       <a href="#home" class="sticky-brand" aria-label="Home">
-        <img src="images/churchlogo.png" alt="Parish Logo" class="sticky-logo" onerror="this.style.display='none'">
+        <img src="images/churchlogo.png" alt="Parish Logo" class="sticky-logo" width="38" height="38" onerror="this.style.display='none'">
         <div class="sticky-name-group">
           <span class="sticky-name">Our Lady Of Assumption</span>
           <span class="sticky-name-sub">Syro Malabar Catholic Mission</span>
@@ -102,7 +111,7 @@
     <section id="home" class="hero-section" aria-label="Welcome to Our Lady Of Assumption">
       <div class="hero-header">
         <a href="#home" class="hero-brand" aria-label="Home">
-          <img src="images/churchlogo.png" alt="Parish Logo" class="hero-logo" onerror="this.style.display='none'">
+          <img src="images/churchlogo.png" alt="Parish Logo" class="hero-logo" width="73" height="73" onerror="this.style.display='none'">
         </a>
       </div>
       <div class="hg-photo-overlay">
@@ -233,32 +242,35 @@
         <p class="up-more"><a href="calendar.html">View full calendar &rarr;</a></p>
       </div>
 
-      <!-- Today's Reading — today's Syro-Malabar Scripture reading (English
-           + Malayalam), via SyroCalendar's own official client-side widget
-           (script tag in <head> + GetLiturgicalReadingsJSON(), per their
-           API docs). That widget already returns only the current
-           liturgical season (Set 2, 2026-09-29 confirmed against
-           SyroCalendar's own Set1/Set2/SetToUse data) — never the older
-           Set 1. Their API only covers "today" — no arbitrary-date lookup
-           — so there's no date picker here; see calendar.html for other
-           dates. -->
+      <!-- Today's Reading — same tabbed reading card used on calendar.html's
+           day-popup (season line, celebration tabs, English/Malayalam
+           toggle, day-of-obligation badge, notes), sourced from the same
+           Panchangam-derived Google Sheet via ReadingsLookup.gs — always
+           loaded with today's date (see js/main.js's initHomeReading()
+           and the shared createReadingCard() controller). No longer uses
+           SyroCalendar's widget. -->
       <div class="hg-reading" id="readingCard" aria-labelledby="reading-heading">
         <div class="hg-section-title">
           <span class="hg-ornament" aria-hidden="true">✦ ✦ ✦</span>
           <h2 id="reading-heading">Today's Reading</h2>
         </div>
-        <p class="rd-daylabel" id="rdDayLabel"></p>
-        <div class="rd-gospel" id="rdGospelBox" hidden>
-          <span class="rd-gospel-label">Gospel</span>
-          <span class="rd-gospel-ref" id="rdGospelRef"></span>
-          <span class="rd-gospel-ref-mal" id="rdGospelRefMal" lang="ml"></span>
+        <div class="rd-card" id="rdCard" hidden>
+          <div class="rd-card-top">
+            <span class="rd-season-wrap">
+              <span class="rd-season" id="rdSeason"></span>
+              <span class="rd-badge" id="rdBadge" hidden>Day of Obligation</span>
+            </span>
+            <div class="rd-lang-toggle" id="rdLangToggle" role="group" aria-label="Reading language">
+              <button type="button" class="rd-lang-btn is-active" data-lang="en">English</button>
+              <button type="button" class="rd-lang-btn" data-lang="ml">&#3374;&#3378;&#3375;&#3390;&#3379;&#3330;</button>
+            </div>
+          </div>
+          <div class="rd-tabs" id="rdTabs" role="tablist" aria-label="Celebration"></div>
+          <div class="rd-body" id="rdBody"></div>
+          <p class="rd-notes" id="rdNotes" hidden></p>
         </div>
-        <p class="rd-status" id="rdStatus">Loading readings&hellip;</p>
-        <details class="rd-expand" id="rdExpand" hidden>
-          <summary>View all readings &#9662;</summary>
-          <div class="rd-more" id="rdMore"></div>
-        </details>
-        <p class="rd-attribution">Powered by <a href="https://syrocalendar.com" target="_blank" rel="noopener">SyroCalendar</a></p>
+        <p class="cal-readings-status" id="rdStatus">Loading readings&hellip;</p>
+        <p class="cal-readings-link" id="rdFallback" hidden>No reading data is available for today right now. Please check back later.</p>
       </div>
 
       <!-- Clergy & Staff -->
@@ -274,7 +286,7 @@
           <!-- Priest — full card with bio -->
           <div class="staff-card staff-card--featured animate-on-scroll">
             <div class="staff-photo-wrap">
-              <img src="images/fr-james-vattakkunnel.jpg" alt="Fr. James Vattakkunnel V.C" class="staff-photo"
+              <img src="images/fr-james-vattakkunnel.jpg" alt="Fr. James Vattakkunnel V.C" class="staff-photo" width="140" height="140" loading="lazy"
                 onerror="this.parentElement.innerHTML='<div class=\'staff-photo-placeholder\'><span>✝</span></div>'">
             </div>
             <h3 class="staff-name">Fr. James Vattakkunnel V.C</h3>
@@ -286,7 +298,7 @@
           <div class="staff-others">
             <div class="staff-card-compact animate-on-scroll">
               <div class="staff-photo-wrap">
-                <img src="images/sanju-joseph.jpg" alt="Mr. Sanju Joseph" class="staff-photo"
+                <img src="images/sanju-joseph.jpg" alt="Mr. Sanju Joseph" class="staff-photo" width="104" height="104" loading="lazy"
                   onerror="this.parentElement.innerHTML='<div class=\'staff-photo-placeholder\'><span>✝</span></div>'">
               </div>
               <h3 class="staff-name">Mr. Sanju Joseph</h3>
@@ -294,7 +306,7 @@
             </div>
             <div class="staff-card-compact animate-on-scroll">
               <div class="staff-photo-wrap">
-                <img src="images/mini-joseph.jpg" alt="Mrs. Mini Joseph" class="staff-photo"
+                <img src="images/mini-joseph.jpg" alt="Mrs. Mini Joseph" class="staff-photo" width="104" height="104" loading="lazy"
                   onerror="this.parentElement.innerHTML='<div class=\'staff-photo-placeholder\'><span>✝</span></div>'">
               </div>
               <h3 class="staff-name">Mrs. Mini Joseph</h3>
@@ -302,7 +314,7 @@
             </div>
             <div class="staff-card-compact animate-on-scroll">
               <div class="staff-photo-wrap">
-                <img src="images/giby-gregory.jpg" alt="Mr. Giby Gregory" class="staff-photo"
+                <img src="images/giby-gregory.jpg" alt="Mr. Giby Gregory" class="staff-photo" width="104" height="104" loading="lazy"
                   onerror="this.parentElement.innerHTML='<div class=\'staff-photo-placeholder\'><span>✝</span></div>'">
               </div>
               <h3 class="staff-name">Mr. Giby Gregory</h3>
@@ -310,7 +322,7 @@
             </div>
             <div class="staff-card-compact animate-on-scroll">
               <div class="staff-photo-wrap">
-                <img src="images/pavan-antony.jpg" alt="Mr. Pavan Antony" class="staff-photo"
+                <img src="images/pavan-antony.jpg" alt="Mr. Pavan Antony" class="staff-photo" width="104" height="104" loading="lazy"
                   onerror="this.parentElement.innerHTML='<div class=\'staff-photo-placeholder\'><span>✝</span></div>'">
               </div>
               <h3 class="staff-name">Mr. Pavan Antony</h3>
@@ -358,7 +370,7 @@
           <h2 id="donate-side-heading">Donate</h2>
         </div>
         <div class="hg-donate-row">
-          <img src="images/churchdonation_new.jpeg" alt="Scan to donate — QR code" class="hg-donate-qr">
+          <img src="images/churchdonation_new.jpeg" alt="Scan to donate — QR code" class="hg-donate-qr" width="130" height="130" loading="lazy">
           <div class="hg-donate-text-block">
             <p>Scan QR Code via Zelle</p>
             <p>Zelle to <a href="mailto:smcc.norwalk@gmail.com"><strong>smcc.norwalk@gmail.com</strong></a></p>
