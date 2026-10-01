@@ -1187,6 +1187,13 @@ body.sticky-visible .hero-nav-drawer { top: calc(var(--topbar-height) + 62px); }
   margin-bottom: .9rem;
   flex-wrap: wrap;
 }
+/* Language toggle now lives in the date row (2026-10-01) so its position
+   stays fixed, instead of inside .rd-card-top where it used to shift up
+   or down depending on how long the season text was — most noticeable
+   on mobile widths. Pinned to the row's right edge; on very narrow
+   screens it simply wraps to its own line below Date/Today, never into
+   the reading content itself. */
+.rd-date-row .rd-lang-toggle { margin-left: auto; }
 .rd-date-label {
   font-size: .82rem;
   font-weight: 700;

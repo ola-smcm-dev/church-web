@@ -262,6 +262,10 @@
           <input type="date" id="rdDatePicker" class="rd-date-input"
                  min="2025-11-30" max="2026-12-31">
           <button type="button" id="rdTodayBtn" class="rd-today-btn">Today</button>
+          <div class="rd-lang-toggle" id="rdLangToggle" role="group" aria-label="Reading language">
+            <button type="button" class="rd-lang-btn is-active" data-lang="en">English</button>
+            <button type="button" class="rd-lang-btn" data-lang="ml">&#3374;&#3378;&#3375;&#3390;&#3379;&#3330;</button>
+          </div>
         </div>
         <div class="rd-card" id="rdCard" hidden>
           <div class="rd-card-top">
@@ -269,10 +273,6 @@
               <span class="rd-season" id="rdSeason"></span>
               <span class="rd-badge" id="rdBadge" hidden>Day of Obligation</span>
             </span>
-            <div class="rd-lang-toggle" id="rdLangToggle" role="group" aria-label="Reading language">
-              <button type="button" class="rd-lang-btn is-active" data-lang="en">English</button>
-              <button type="button" class="rd-lang-btn" data-lang="ml">&#3374;&#3378;&#3375;&#3390;&#3379;&#3330;</button>
-            </div>
           </div>
           <div class="rd-tabs" id="rdTabs" role="tablist" aria-label="Celebration"></div>
           <div class="rd-body" id="rdBody"></div>
