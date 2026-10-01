@@ -1052,6 +1052,39 @@ function loadEventsList(onData) {
    ───────────────────────────────────────────────────── */
 var READINGS_URL = "https://script.google.com/macros/s/AKfycbzFOCM_Ze5FPT0qlbzywP7lYL5Lsec3-RB6JaHN3jH4vF6P3-nUc1fnMooAx63VfjgF/exec";
 var READING_SLOT_LABELS = { Law: "Law", Prophets: "Prophets", Epistle: "Epistle", Gospel: "Gospel" };
+var READINGS_FETCH_TIMEOUT_MS = 10000; // Apps Script can be slow on a cold start — don't hang forever
+
+/**
+ * fetch() with a hard timeout (Apps Script cold-starts and un-cached lookups
+ * can take a while) so a slow response shows the "couldn't load" fallback
+ * instead of leaving the "Loading readings…" status stuck indefinitely.
+ */
+function fetchReadingsJson_(url, timeoutMs) {
+  return new Promise(function (resolve, reject) {
+    var controller = (typeof AbortController !== "undefined") ? new AbortController() : null;
+    var timedOut = false;
+    var timer = setTimeout(function () {
+      timedOut = true;
+      if (controller) controller.abort();
+      reject(new Error("readings fetch timed out"));
+    }, timeoutMs);
+
+    fetch(url, controller ? { signal: controller.signal } : undefined)
+      .then(function (res) {
+        clearTimeout(timer);
+        if (timedOut) return; // already rejected
+        if (!res.ok) throw new Error("bad status " + res.status);
+        return res.json();
+      })
+      .then(function (data) {
+        if (!timedOut) resolve(data);
+      })
+      .catch(function (err) {
+        clearTimeout(timer);
+        if (!timedOut) reject(err);
+      });
+  });
+}
 
 function createReadingCard(els) {
   if (!els.card) return { load: function () {} };
@@ -1173,9 +1206,18 @@ function createReadingCard(els) {
       return;
     }
 
-    fetch(READINGS_URL + "?date=" + encodeURIComponent(dateStr))
-      .then(function (res) { return res.json(); })
+    var url = READINGS_URL + "?date=" + encodeURIComponent(dateStr);
+
+    fetchReadingsJson_(url, READINGS_FETCH_TIMEOUT_MS)
+      .catch(function () {
+        // One retry after a short pause — a timeout is most often a slow/
+        // cold-starting Apps Script response, and a second attempt usually
+        // lands fine (especially once it's cached server-side).
+        return new Promise(function (resolve) { setTimeout(resolve, 800); })
+          .then(function () { return fetchReadingsJson_(url, READINGS_FETCH_TIMEOUT_MS); });
+      })
       .then(function (data) {
+        if (mySeq !== reqSeq) return;
         cache[dateStr] = data;
         render(data, mySeq);
       })
@@ -1201,11 +1243,22 @@ function createReadingCard(els) {
 }
 
 /* ─────────────────────────────────────────────────────
-   HOME PAGE — Today's Reading (Panchangam sheet, always today)
+   HOME PAGE — Daily Readings, with a date picker
+   (index.html only — this is now the ONLY place the reading card
+   lives on the site; calendar.html's day-popup had its own copy
+   of #rdCard/#rdSeason/etc. until 2026-09-30, when it was removed
+   so the feature isn't duplicated across two pages. The #calGrid
+   guard below is kept as a defensive no-op in case this script
+   ever runs on a page that still has stale reading-card markup.)
    ───────────────────────────────────────────────────── */
 function initHomeReading() {
+  if (document.getElementById("calGrid")) return; // calendar.html no longer has #rdCard at all
+
   var card = document.getElementById("rdCard");
   if (!card) return;
+
+  var picker   = document.getElementById("rdDatePicker");
+  var todayBtn = document.getElementById("rdTodayBtn");
 
   var readingCard = createReadingCard({
     card:       card,
@@ -1220,9 +1273,27 @@ function initHomeReading() {
   });
 
   function pad(n) { return n < 10 ? "0" + n : "" + n; }
-  var t = new Date();
-  var todayStr = t.getFullYear() + "-" + pad(t.getMonth() + 1) + "-" + pad(t.getDate());
-  readingCard.load(todayStr);
+  function todayStr() {
+    var t = new Date();
+    return t.getFullYear() + "-" + pad(t.getMonth() + 1) + "-" + pad(t.getDate());
+  }
+
+  var initial = todayStr();
+  if (picker) picker.value = initial;
+  readingCard.load(initial);
+
+  if (picker) {
+    picker.addEventListener("change", function () {
+      if (picker.value) readingCard.load(picker.value);
+    });
+  }
+  if (todayBtn) {
+    todayBtn.addEventListener("click", function () {
+      var t = todayStr();
+      if (picker) picker.value = t;
+      readingCard.load(t);
+    });
+  }
 }
 
 /* ─────────────────────────────────────────────────────
@@ -1278,30 +1349,13 @@ function initEvents() {
   var detailEvts = document.getElementById("calDetailEvents");
   var closeBtn   = document.getElementById("calDetailClose");
 
-  // Daily readings (added 2026-09-29)
-  var rdCard     = document.getElementById("rdCard");
-  var rdSeason   = document.getElementById("rdSeason");
-  var rdLangTog  = document.getElementById("rdLangToggle");
-  var rdTabs     = document.getElementById("rdTabs");
-  var rdBody     = document.getElementById("rdBody");
-  var rdNotes    = document.getElementById("rdNotes");
-  var rdStatus   = document.getElementById("rdStatus");
-  var rdFallback = document.getElementById("rdFallback");
-  var rdBadge    = document.getElementById("rdBadge");
-
   if (!grid) return;
 
-  var readingCard = createReadingCard({
-    card:       rdCard,
-    season:     rdSeason,
-    badge:      rdBadge,
-    langToggle: rdLangTog,
-    tabs:       rdTabs,
-    body:       rdBody,
-    notes:      rdNotes,
-    status:     rdStatus,
-    fallback:   rdFallback
-  });
+  // Daily Scripture readings used to have their own card here too (added
+  // 2026-09-29) — moved to be home-page-only, with a date picker, on
+  // 2026-09-30 (see initHomeReading()) rather than duplicating the reading
+  // card as a second, separate instance on this page. This page just shows
+  // parish events; for a given day's readings, visit the home page.
 
   // Days of obligation / important feasts, for the month-grid highlight.
   // Derived from the same verified liturgical dataset as the readings sheet
@@ -1383,8 +1437,6 @@ function initEvents() {
 
     detail.hidden = false;
     detail.scrollIntoView({ behavior: "smooth", block: "nearest" });
-
-    readingCard.load(dateStr);
   }
 
   // ── Controls ──

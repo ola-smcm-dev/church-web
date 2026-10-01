@@ -36,7 +36,7 @@
   <noscript><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet"></noscript>
 
   <!-- Stylesheet -->
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/style.css?v=20260930">
 
   <!-- Preload the hero photo so the browser starts fetching it right away
        instead of waiting to discover it inside css/style.css — this is
@@ -242,17 +242,26 @@
         <p class="up-more"><a href="calendar.html">View full calendar &rarr;</a></p>
       </div>
 
-      <!-- Today's Reading — same tabbed reading card used on calendar.html's
-           day-popup (season line, celebration tabs, English/Malayalam
-           toggle, day-of-obligation badge, notes), sourced from the same
-           Panchangam-derived Google Sheet via ReadingsLookup.gs — always
-           loaded with today's date (see js/main.js's initHomeReading()
-           and the shared createReadingCard() controller). No longer uses
-           SyroCalendar's widget. -->
+      <!-- Daily Readings — the only copy of the tabbed reading card on the
+           site (season line, celebration tabs, English/Malayalam toggle,
+           day-of-obligation badge, notes), sourced from the Panchangam-
+           derived Google Sheet via ReadingsLookup.gs. Defaults to today but
+           includes a date picker so any date in the supported range
+           (2025-11-30 through 2026-12-31) can be looked up — see
+           js/main.js's initHomeReading() and the shared createReadingCard()
+           controller. calendar.html's day-popup used to have its own copy
+           of this card; that was removed 2026-09-30 so the feature lives in
+           exactly one place. -->
       <div class="hg-reading" id="readingCard" aria-labelledby="reading-heading">
         <div class="hg-section-title">
           <span class="hg-ornament" aria-hidden="true">✦ ✦ ✦</span>
-          <h2 id="reading-heading">Today's Reading</h2>
+          <h2 id="reading-heading">Daily Readings</h2>
+        </div>
+        <div class="rd-date-row">
+          <label class="rd-date-label" for="rdDatePicker">Date</label>
+          <input type="date" id="rdDatePicker" class="rd-date-input"
+                 min="2025-11-30" max="2026-12-31">
+          <button type="button" id="rdTodayBtn" class="rd-today-btn">Today</button>
         </div>
         <div class="rd-card" id="rdCard" hidden>
           <div class="rd-card-top">
@@ -565,8 +574,8 @@
     </div>
   </div>
 
-  <script src="js/main.js"></script>
-  <script src="js/media.js"></script>
+  <script src="js/main.js?v=20260930"></script>
+  <script src="js/media.js?v=20260930"></script>
 
   <noscript>
     <p style="text-align:center;padding:1rem;background:#f8f4ed;">
