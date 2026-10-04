@@ -1014,7 +1014,17 @@ body.sticky-visible .hero-nav-drawer { top: calc(var(--topbar-height) + 62px); }
 .cal-day--has-events { background: var(--tint-announce); }
 .cal-day--has-events:hover { background: var(--cream-dark); }
 
-/* Day of obligation / important feast (2026-09-29) */
+/* Feast day (SyroMalabarDates sheet): small navy dot; day of obligation below overrides with the gold treatment */
+.cal-day--feast::after {
+  content: "";
+  position: absolute;
+  top: 3px; right: 3px;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--navy-light);
+}
+
+/* Day of obligation (gold outline + gold dot) */
 .cal-day--important { border-color: var(--gold); box-shadow: inset 0 0 0 1px var(--gold); }
 .cal-day--important::after {
   content: "";
@@ -3510,3 +3520,112 @@ a:hover > .pl-thumb .pl-play { transform: scale(1.1); background: var(--gold-lig
   .pl-nav-next { right: .35rem; }
   .pl-modal-box > .pl-modal-close { top: -3.1rem; }
 }
+
+
+/* ── Feast days (SyroMalabarDates sheet) — home "This Week" block + calendar month list ── */
+.hg-feasts[hidden], .hg-feasts-title[hidden], .cal-feasts[hidden], .cal-feasts-none[hidden] { display: none; }
+
+.hg-feasts { margin-top: 1.1rem; }
+.hg-announce-scroll[hidden] { display: none; }
+.hg-announce-scroll:not([hidden]) + .hg-feasts { padding-top: 1rem; border-top: 1px solid rgba(201,164,40,.35); }
+
+.hg-feasts-title {
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--navy);
+  margin: 0 0 .6rem;
+}
+
+.hg-feasts-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .4rem; }
+
+.hg-feast {
+  font-size: .92rem;
+  line-height: 1.45;
+  color: var(--text);
+  padding: .4rem .7rem;
+  background: #fff;
+  border-left: 4px solid var(--cream-dark);
+  border-radius: 6px;
+  overflow-wrap: anywhere;
+}
+.hg-feast-date { font-weight: 800; color: var(--navy); white-space: nowrap; }
+.hg-feast--obligation {
+  background: #fdf6dc;
+  border-left-color: var(--gold);
+  box-shadow: 0 1px 4px rgba(201,164,40,.25);
+}
+.hg-feast--obligation .hg-feast-name { font-weight: 700; }
+.hg-feast-tag { font-weight: 800; color: var(--gold-dark); white-space: nowrap; }
+
+.hg-feasts-more {
+  display: inline-block;
+  margin-top: .8rem;
+  color: var(--gold-dark);
+  font-weight: 700;
+  font-size: .85rem;
+  text-decoration: none;
+  border-bottom: 1px solid var(--gold-dark);
+  padding-bottom: 1px;
+}
+.hg-feasts-more:hover { color: var(--navy); border-bottom-color: var(--navy); }
+
+/* Calendar page: list under the grid */
+.cal-feasts { margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--cream-dark); }
+.cal-feasts-title {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--navy);
+  margin: 0 0 .65rem;
+}
+.cal-feasts-none { font-size: .88rem; color: var(--text-muted); font-style: italic; margin: 0; }
+.cal-feasts-legend { margin: .9rem 0 0; font-size: .75rem; color: var(--text-muted); display: flex; flex-wrap: wrap; align-items: center; gap: .35rem 1rem; }
+.cal-legend-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: .3rem; vertical-align: middle; }
+.cal-legend-dot--feast { background: var(--navy-light); }
+.cal-legend-dot--ob { background: var(--gold-dark); }
+
+/* Day popup: feast lines */
+.cal-detail-feast {
+  font-size: .88rem;
+  font-weight: 700;
+  color: var(--navy);
+  padding: .4rem .6rem;
+  margin-bottom: .5rem;
+  background: var(--cream);
+  border-left: 4px solid var(--navy-light);
+  border-radius: 4px;
+}
+.cal-detail-feast--obligation { background: #fdf6dc; border-left-color: var(--gold); }
+.cal-detail-feast-label { font-size: .7rem; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; color: var(--gold-dark); margin-right: .35rem; }
+
+/* ── Upcoming Events: "next 5" arrow ── */
+.up-pager[hidden] { display: none; }
+.up-pager { display: flex; justify-content: center; margin-top: .8rem; }
+.up-pager-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  background: none;
+  border: none;
+  padding: .2rem .4rem;
+  cursor: pointer;
+  font: inherit;
+  font-size: .82rem;
+  font-weight: 700;
+  color: var(--navy);
+}
+.up-pager-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--navy);
+  color: var(--gold-light);
+  font-size: .7rem;
+  line-height: 1;
+  transition: background var(--transition), transform var(--transition);
+}
+.up-pager-btn:hover .up-pager-arrow { background: var(--navy-light); transform: translateY(1px); }
+.up-pager-btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; border-radius: 999px; }

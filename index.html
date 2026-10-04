@@ -36,7 +36,7 @@
   <noscript><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet"></noscript>
 
   <!-- Stylesheet -->
-  <link rel="stylesheet" href="css/style.css?v=20260930">
+  <link rel="stylesheet" href="css/style.css?v=20261003">
 
   <!-- Preload the hero photo so the browser starts fetching it right away
        instead of waiting to discover it inside css/style.css — this is
@@ -230,7 +230,9 @@
 
     <div class="lg-left">
 
-      <!-- Upcoming Events — next 5 events from the Calendar Events sheet.
+      <!-- Upcoming Events — the next 10 events from the Calendar Events sheet,
+           5 shown at a time; the small arrow button (#upPager) flips between
+           events 1–5 and 6–10 (hidden when there are 5 or fewer).
            Full month-grid calendar moved to calendar.html 2026-09-28. -->
       <div class="hg-upcoming" id="upcomingEvents" aria-labelledby="upcoming-heading">
         <div class="hg-section-title">
@@ -239,6 +241,12 @@
         </div>
         <ul class="up-list" id="upList" aria-live="polite"></ul>
         <p class="up-empty" id="upEmpty" hidden>No upcoming events at this time.</p>
+        <div class="up-pager" id="upPager" hidden>
+          <button type="button" class="up-pager-btn" id="upPagerBtn" aria-controls="upList" aria-label="Show the next 5 events">
+            <span class="up-pager-arrow" id="upPagerArrow" aria-hidden="true">&#9660;</span>
+            <span class="up-pager-text" id="upPagerText">Next 5 events</span>
+          </button>
+        </div>
         <p class="up-more"><a href="calendar.html">View full calendar &rarr;</a></p>
       </div>
 
@@ -346,7 +354,7 @@
 
     <div class="lg-right">
 
-      <!-- Announcements (hidden until the sheet has at least one active announcement) -->
+      <!-- Announcements + Feast Days This Week (hidden until the sheet has at least one active announcement or there is a feast day this week) -->
       <div class="hg-announce" id="announcements" aria-label="Parish announcements" hidden>
         <div class="hg-section-title">
           <span class="hg-ornament" aria-hidden="true">✦ ✦ ✦</span>
@@ -354,6 +362,14 @@
         </div>
         <div class="hg-announce-scroll" aria-live="polite">
           <div class="hg-announce-track"></div>
+        </div>
+        <!-- Feast days of the current week (Sunday–Saturday) from the
+             SyroMalabarDates sheet — see js/main.js → initHomeFeasts().
+             The card shows if there are announcements OR feast days. -->
+        <div class="hg-feasts" id="hgFeasts" hidden>
+          <h3 class="hg-feasts-title" id="hgFeastsTitle" hidden>Feast Days This Week</h3>
+          <ul class="hg-feasts-list" id="hgFeastsList"></ul>
+          <a class="hg-feasts-more" href="calendar.html">Check Calendar Page for all feast days &rarr;</a>
         </div>
       </div>
 
@@ -574,8 +590,8 @@
     </div>
   </div>
 
-  <script src="js/main.js?v=20260930"></script>
-  <script src="js/media.js?v=20260930"></script>
+  <script src="js/main.js?v=20261003"></script>
+  <script src="js/media.js?v=20261003"></script>
 
   <noscript>
     <p style="text-align:center;padding:1rem;background:#f8f4ed;">

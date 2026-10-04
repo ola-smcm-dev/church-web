@@ -67,6 +67,15 @@ const CONFIG = {
   // File → Share → Publish to web → (this tab) → CSV → Publish
   eventsSheetUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSluQ2kZE_gDTLtpDOkBMlSUBLH9hroTEw3sm3g4AMwYAcyH1FHImxiTXldXHqttzvFnL7JG6K6dlIg/pub?gid=1327592415&single=true&output=csv",
 
+  // ── Feast days & days of obligation (Google Sheets, tab "SyroMalabarDates") ──
+  // Sheet columns: Date | Type | Title   (an optional "Resolved Date" column is also understood — see FEAST DAYS below)
+  // Fixed feasts: type the date as e.g. "December 25" — it then repeats every year by itself.
+  // Movable feasts (Easter, "First Friday of Denha"…): the Date cell holds the rule text;
+  // the real date for each year is worked out from that rule (see FEAST DAYS below); an optional "Resolved Date" column overrides it.
+  // Type containing the word "Obligation" = highlighted as a Day of Obligation.
+  // File → Share → Publish to web → (the SyroMalabarDates tab) → CSV → Publish.
+  syroDatesSheetUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSluQ2kZE_gDTLtpDOkBMlSUBLH9hroTEw3sm3g4AMwYAcyH1FHImxiTXldXHqttzvFnL7JG6K6dlIg/pub?gid=1780890674&single=true&output=csv",
+
   // ── Parish Posters ─────────────────────────────
   // No longer a Sheet — posters now come straight from a "Posters" folder
   // in Drive via the Media API (mediaApiUrl below, ?action=posters). Just
@@ -110,6 +119,7 @@ document.addEventListener("DOMContentLoaded", function () {
   initMapEmbed();
   setFooterYear();
   initAnnouncements();
+  initHomeFeasts();
   initUpcoming();
   initHomeReading();
   initEvents();
@@ -393,6 +403,26 @@ function setFooterYear() {
                       and open the pop-up if there is a new one
      4. On failure  → whatever is on screen stays as it is
    ───────────────────────────────────────────────────── */
+/* The Announcements card also carries "Feast Days This Week" (initHomeFeasts,
+   further down). It shows while EITHER has something to show, so both parts
+   report here and this works out what the card looks like. */
+var ANNOUNCE_STATE = { announcements: false, feasts: false };
+
+function refreshAnnounceCard() {
+  var box = document.getElementById("announcements");
+  if (!box) return;
+  var scroll   = box.querySelector(".hg-announce-scroll");
+  var heading  = box.querySelector(".hg-section-title h2");
+  var subtitle = document.getElementById("hgFeastsTitle");
+  var hasA = ANNOUNCE_STATE.announcements, hasF = ANNOUNCE_STATE.feasts;
+
+  box.hidden = !(hasA || hasF);
+  if (scroll)  scroll.hidden = !hasA;
+  // Feast days alone: the card's own heading says it. Together with announcements: a sub-heading separates them.
+  if (heading) heading.textContent = hasA ? "Announcements" : "Feast Days This Week";
+  if (subtitle) subtitle.hidden = !(hasA && hasF);
+}
+
 function initAnnouncements() {
   var box   = document.getElementById("announcements");
   var track = box && box.querySelector(".hg-announce-track");
@@ -438,7 +468,8 @@ function initAnnouncements() {
   function render(items) {
     if (!items || !items.length) {
       track.innerHTML = "";
-      box.hidden = true;
+      ANNOUNCE_STATE.announcements = false;
+      refreshAnnounceCard();      // the box stays up if there are feast days this week
       return;
     }
     track.innerHTML = items.map(function (it) {
@@ -447,7 +478,8 @@ function initAnnouncements() {
                '<div class="hg-announce-body">' + linkify(it.text) + '</div>' +
              '</div>';
     }).join("");
-    box.hidden = false;
+    ANNOUNCE_STATE.announcements = true;
+    refreshAnnounceCard();
   }
 
   // ── localStorage helpers ──
@@ -1134,7 +1166,7 @@ function createReadingCard(els) {
       var label = "Reading " + (i + 1) + " (" + slotName + ")";
       return '<div class="rd-row">' +
         '<span class="rd-row-label">' + escapeHtml(label) + '</span>' +
-        '<span class="rd-row-text"><strong>' + escapeHtml(r.ref || "") + '</strong>' +
+        '<span class="rd-row-text"><strong>' + escapeHtml(expandBookNames(r.ref || "")) + '</strong>' +
         (r.title ? '<span>' + escapeHtml(r.title) + '</span>' : '') +
         '</span></div>';
     }).join("");
@@ -1304,24 +1336,31 @@ function initUpcoming() {
   var empty = document.getElementById("upEmpty");
   if (!list) return;
 
+  // The next 10 events are loaded; 5 show at a time, and a small arrow
+  // button below the list flips between events 1–5 and 6–10.
+  var PAGE_SIZE = 5, MAX_EVENTS = 10;
+  var pager     = document.getElementById("upPager");
+  var pagerBtn  = document.getElementById("upPagerBtn");
+  var pagerText = document.getElementById("upPagerText");
+  var pagerArrow = document.getElementById("upPagerArrow");
+  var upcoming  = [];
+  var page      = 0;
+
   var MON = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
   function pad(n) { return n < 10 ? "0" + n : "" + n; }
 
-  function render(all) {
-    var today    = new Date();
-    var todayStr = today.getFullYear() + "-" + pad(today.getMonth() + 1) + "-" + pad(today.getDate());
-    var upcoming = all
-      .filter(function (ev) { return ev.date >= todayStr; })
-      .sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; })
-      .slice(0, 5);
+  function renderPage() {
+    var pages = Math.ceil(upcoming.length / PAGE_SIZE);
+    if (page > pages - 1) page = Math.max(0, pages - 1);   // fresh data may have fewer events than before
 
     if (!upcoming.length) {
       list.innerHTML = "";
       empty.hidden = false;
+      if (pager) pager.hidden = true;
       return;
     }
     empty.hidden = true;
-    list.innerHTML = upcoming.map(function (ev) {
+    list.innerHTML = upcoming.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE).map(function (ev) {
       var d = new Date(ev.date + "T00:00:00");
       return '<li class="up-item">' +
         '<div class="up-date"><span class="mon">' + MON[d.getMonth()] + '</span><span class="day">' + pad(d.getDate()) + '</span></div>' +
@@ -1329,6 +1368,32 @@ function initUpcoming() {
         (ev.time ? '<div class="up-sub">' + escapeHtml(ev.time) + '</div>' : '') +
         '</div></li>';
     }).join("");
+
+    if (pager) {
+      pager.hidden = pages < 2;     // 5 events or fewer: nothing to page through
+      var onLast = page >= pages - 1;
+      if (pagerText)  pagerText.textContent = onLast ? "Back to the first 5" : "Next 5 events";
+      if (pagerArrow) pagerArrow.innerHTML  = onLast ? "&#9650;" : "&#9660;";   // ▲ / ▼
+      if (pagerBtn)   pagerBtn.setAttribute("aria-label", onLast ? "Show the first 5 events" : "Show the next 5 events");
+    }
+  }
+
+  if (pagerBtn) {
+    pagerBtn.addEventListener("click", function () {
+      var pages = Math.ceil(upcoming.length / PAGE_SIZE);
+      page = (page + 1) % Math.max(pages, 1);
+      renderPage();
+    });
+  }
+
+  function render(all) {
+    var today    = new Date();
+    var todayStr = today.getFullYear() + "-" + pad(today.getMonth() + 1) + "-" + pad(today.getDate());
+    upcoming = all
+      .filter(function (ev) { return ev.date >= todayStr; })
+      .sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; })
+      .slice(0, MAX_EVENTS);
+    renderPage();
   }
 
   loadEventsList(render);
@@ -1357,13 +1422,15 @@ function initEvents() {
   // card as a second, separate instance on this page. This page just shows
   // parish events; for a given day's readings, visit the home page.
 
-  // Days of obligation / important feasts, for the month-grid highlight.
-  // Derived from the same verified liturgical dataset as the readings sheet
-  // (see build_sheet.py's clean_notes()) — regenerate this list whenever a
-  // new year's Panchangam is processed.
-  var IMPORTANT_DATES = {
-    "2025-12-25": 1, "2026-01-06": 1, "2026-05-14": 1, "2026-06-29": 1,
-    "2026-07-03": 1, "2026-08-15": 1, "2026-12-25": 1
+  // Feast days / days of obligation come from the "SyroMalabarDates" sheet
+  // (see the FEAST DAYS section below). They mark the month grid and are
+  // listed under it. This replaced the hand-typed IMPORTANT_DATES list.
+  var feasts = createFeastStore();
+  var feastEls = {
+    box:   document.getElementById("calFeasts"),
+    title: document.getElementById("calFeastsTitle"),
+    list:  document.getElementById("calFeastsList"),
+    none:  document.getElementById("calFeastsNone")
   };
 
   var today     = new Date();
@@ -1394,9 +1461,11 @@ function initEvents() {
       var dateStr = viewYear + "-" + pad(viewMonth + 1) + "-" + pad(day);
       var isToday = viewYear === today.getFullYear() && viewMonth === today.getMonth() && day === today.getDate();
       var evts    = eventsMap[dateStr] || [];
-      var isImportant = !!IMPORTANT_DATES[dateStr];
-      var cls     = "cal-day" + (isToday ? " cal-day--today" : "") + (evts.length ? " cal-day--has-events" : "") + (isImportant ? " cal-day--important" : "");
-      var ariaLbl = MONTHS[viewMonth] + " " + day + (evts.length ? ", " + evts.length + " event" + (evts.length > 1 ? "s" : "") : "") + (isImportant ? ", day of obligation" : "");
+      var dayFeasts   = feasts.on(dateStr);
+      var isFeast     = dayFeasts.length > 0;
+      var isImportant = dayFeasts.some(function (f) { return f.obligation; });
+      var cls     = "cal-day" + (isToday ? " cal-day--today" : "") + (evts.length ? " cal-day--has-events" : "") + (isFeast ? " cal-day--feast" : "") + (isImportant ? " cal-day--important" : "");
+      var ariaLbl = MONTHS[viewMonth] + " " + day + (evts.length ? ", " + evts.length + " event" + (evts.length > 1 ? "s" : "") : "") + (isFeast ? ", feast day: " + dayFeasts.map(function (f) { return f.title; }).join("; ") : "") + (isImportant ? ", day of obligation" : "");
 
       html += '<div class="' + cls + '" data-date="' + dateStr + '" role="button" tabindex="0" aria-label="' + ariaLbl + '">';
       html += '<span class="cal-day-num">' + day + '</span>';
@@ -1408,6 +1477,7 @@ function initEvents() {
     }
 
     grid.innerHTML = html;
+    renderFeastList();
     grid.querySelectorAll(".cal-day[data-date]").forEach(function (cell) {
       cell.addEventListener("click", function () { openDay(cell.dataset.date); });
       cell.addEventListener("keydown", function (e) {
@@ -1416,15 +1486,36 @@ function initEvents() {
     });
   }
 
+  // ── Feast days of the month shown, listed under the grid ──
+  function renderFeastList() {
+    if (!feastEls.box) return;
+    if (!feasts.count()) { feastEls.box.hidden = true; return; }   // sheet not loaded (or empty): show nothing
+    var items = [], daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+    for (var day = 1; day <= daysInMonth; day++) {
+      feasts.on(viewYear + "-" + pad(viewMonth + 1) + "-" + pad(day)).forEach(function (f) { items.push(f); });
+    }
+    if (feastEls.title) feastEls.title.textContent = "Feast Days in " + MONTHS[viewMonth];
+    feastEls.list.innerHTML = items.map(feastItemHtml_).join("");
+    if (feastEls.none) feastEls.none.hidden = items.length > 0;
+    feastEls.box.hidden = false;
+  }
+
   // ── Open day detail panel ──
   function openDay(dateStr) {
     var d     = new Date(dateStr + "T00:00:00");
     detailDate.textContent = MONTHS[d.getMonth()] + " " + d.getDate() + ", " + d.getFullYear();
 
+    // Feast days (from the SyroMalabarDates sheet)
+    var feastHtml = feasts.on(dateStr).map(function (f) {
+      return '<div class="cal-detail-feast' + (f.obligation ? ' cal-detail-feast--obligation' : '') + '">' +
+        '<span class="cal-detail-feast-label">' + (f.obligation ? 'Day of Obligation' : 'Feast Day') + '</span> ' +
+        escapeHtml(f.title) + '</div>';
+    }).join("");
+
     // Parish events
     var evts = eventsMap[dateStr] || [];
     if (evts.length) {
-      detailEvts.innerHTML = evts.map(function (ev) {
+      detailEvts.innerHTML = feastHtml + evts.map(function (ev) {
         return '<div class="cal-detail-event">' +
           (ev.time ? '<span class="cal-detail-event-time">' + escapeHtml(ev.time) + '</span>' : '') +
           '<span class="cal-detail-event-title">' + escapeHtml(ev.title) + '</span>' +
@@ -1432,7 +1523,7 @@ function initEvents() {
           '</div>';
       }).join("");
     } else {
-      detailEvts.innerHTML = '<p class="cal-detail-none">No parish events scheduled.</p>';
+      detailEvts.innerHTML = feastHtml + '<p class="cal-detail-none">No parish events scheduled.</p>';
     }
 
     detail.hidden = false;
@@ -1460,9 +1551,10 @@ function initEvents() {
     renderCalendar();
   }
 
-  // Initial render (no events yet)
+  // Initial render (no events yet), then fill in events and feast days as they load
   renderCalendar();
   loadEventsList(buildMap);
+  loadFeastRows(function (rows) { feasts.setRows(rows); renderCalendar(); });
 }
 
 /* ─────────────────────────────────────────────────────
@@ -1688,4 +1780,352 @@ function escapeHtml(str) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
+}
+
+/* ─────────────────────────────────────────────────────
+   FEAST DAYS — from the "SyroMalabarDates" tab of the WebAdmin sheet
+   (published as CSV; CONFIG.syroDatesSheetUrl)
+
+   Sheet columns:  Date | Type | Title | (optional) Resolved Date
+
+   • Fixed feasts have a calendar date ("December 25"). The year is
+     ignored, so they come back every year with no edits.
+   • Movable feasts have a RULE in the Date cell instead — "Sixth
+     Thursday after Easter", "Third Friday of Apostles", "Changes Every
+     Year" (with the feast's name in Title: Palm Sunday, Pesaha
+     Thursday, Passion Friday, Easter). feastResolveRule_() turns the
+     rule into a real date for any year, using the Easter date and the
+     Syro-Malabar season layout (checked against the 2026 Panchangam).
+   • Safety net: a "Resolved Date" cell (e.g. 2027-05-27) overrides the
+     computed date for that year, if a rule ever lands on the wrong day.
+   • A Type containing "Obligation" is shown highlighted with "(Obligation)".
+   ───────────────────────────────────────────────────── */
+var FEASTS_CACHE_KEY = "ola_feasts_v1";
+var FEAST_MONTHS_ = { jan:0, feb:1, mar:2, apr:3, may:4, jun:5, jul:6, aug:7, sep:8, oct:9, nov:10, dec:11 };
+var FEAST_MON_NAMES_ = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+var FEAST_FULL_MONTHS_ = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+var FEAST_ORD_ = { first:1, second:2, third:3, fourth:4, fifth:5, sixth:6, seventh:7 };
+var FEAST_DOW_ = { sunday:0, monday:1, tuesday:2, wednesday:3, thursday:4, friday:5, saturday:6 };
+
+function feastNorm_(s) { return String(s == null ? "" : s).toLowerCase().replace(/[^a-z0-9]/g, ""); }
+function feastPad_(n) { return n < 10 ? "0" + n : "" + n; }
+function feastFmt_(dt) { return dt.getFullYear() + "-" + feastPad_(dt.getMonth() + 1) + "-" + feastPad_(dt.getDate()); }
+function feastAdd_(dt, n) { return new Date(dt.getFullYear(), dt.getMonth(), dt.getDate() + n); }
+
+// Western Easter Sunday (Anonymous Gregorian algorithm)
+function feastEaster_(y) {
+  var a = y % 19, b = Math.floor(y / 100), c = y % 100;
+  var d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25);
+  var g = Math.floor((b - f + 1) / 3), h = (19 * a + b - d - g + 15) % 30;
+  var i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7;
+  var m = Math.floor((a + 11 * h + 22 * l) / 451);
+  var month = Math.floor((h + l - 7 * m + 114) / 31);
+  var day = ((h + l - 7 * m + 114) % 31) + 1;
+  return new Date(y, month - 1, day);
+}
+// First date on or after (month, day) that falls on the given weekday
+function feastOnOrAfter_(y, month, day, dow) {
+  var dt = new Date(y, month, day);
+  while (dt.getDay() !== dow) dt = feastAdd_(dt, 1);
+  return dt;
+}
+
+// "December 25", "Dec 25", "25 December", "12/25", "12/25/2026", "2026-12-25" → {m, d} (year ignored)
+function parseFeastMonthDay_(text) {
+  var t = String(text || "").trim(), m, mon, day;
+  if ((m = t.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/))) { mon = +m[2] - 1; day = +m[3]; }
+  else if ((m = t.match(/^(\d{1,2})\/(\d{1,2})(?:\/\d{2,4})?$/))) { mon = +m[1] - 1; day = +m[2]; }
+  else if ((m = t.match(/^([A-Za-z]{3,9})\.?\s+(\d{1,2})(?:st|nd|rd|th)?(?:\s*,?\s*\d{4})?$/))) {
+    mon = FEAST_MONTHS_[m[1].slice(0, 3).toLowerCase()]; day = +m[2];
+  }
+  else if ((m = t.match(/^(\d{1,2})(?:st|nd|rd|th)?\s+([A-Za-z]{3,9})\.?(?:\s*,?\s*\d{4})?$/))) {
+    mon = FEAST_MONTHS_[m[2].slice(0, 3).toLowerCase()]; day = +m[1];
+  }
+  else return null;
+  if (mon === undefined || mon < 0 || mon > 11 || day < 1 || day > 31) return null;
+  return { m: mon, d: day };
+}
+
+// "Resolved Date" cell → list of exact Date objects (full dates only; several may be separated by ; or ,)
+function parseFeastExactDates_(text) {
+  var out = [];
+  String(text || "").split(/[;|\n]+/).forEach(function (part) {
+    var t = part.trim(), m, dt = null;
+    if ((m = t.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/))) dt = new Date(+m[1], +m[2] - 1, +m[3]);
+    else if ((m = t.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/))) dt = new Date(+m[3], +m[1] - 1, +m[2]);
+    else if ((m = t.match(/^([A-Za-z]{3,9})\.?\s+(\d{1,2})(?:st|nd|rd|th)?\s*,?\s*(\d{4})$/)) && FEAST_MONTHS_[m[1].slice(0, 3).toLowerCase()] !== undefined) {
+      dt = new Date(+m[3], FEAST_MONTHS_[m[1].slice(0, 3).toLowerCase()], +m[2]);
+    }
+    if (dt && !isNaN(dt.getTime())) out.push(dt);
+  });
+  return out;
+}
+
+// Turn a movable-feast rule into a real date for `year` (or null when the rule isn't recognised)
+function feastResolveRule_(rule, title, year) {
+  var r = String(rule || "").replace(/\s+/g, " ").trim();
+  r = r.split(/\s+or\s+/i)[0].replace(/[:;,.\s]+$/, "");        // "Second Friday of Denha or June 29" → first rule
+  var low = r.toLowerCase(), m;
+  var easter = feastEaster_(year);
+  var ORD = "(first|second|third|fourth|fifth|sixth|seventh)";
+  var DOW = "(sunday|monday|tuesday|wednesday|thursday|friday|saturday)";
+
+  if (low === "changes every year") {
+    var t = feastNorm_(title);
+    if (t === "easter" || t === "eastersunday" || t === "resurrection") return easter;
+    if (t === "palmsunday") return feastAdd_(easter, -7);
+    if (t === "pesahathursday" || t === "maundythursday") return feastAdd_(easter, -3);
+    if (t === "passionfriday" || t === "goodfriday") return feastAdd_(easter, -2);
+    return null;
+  }
+  if (low === "fifty days after easter") return feastAdd_(easter, 49);                 // Pentecost
+  if ((m = low.match(new RegExp("^" + ORD + " " + DOW + " after easter$")))) {          // Sixth Thursday after Easter
+    return feastAdd_(easter, 7 * (FEAST_ORD_[m[1]] - 1) + (FEAST_DOW_[m[2]] || 7));
+  }
+  if ((m = low.match(new RegExp("^" + DOW + " after pentecost$")))) {                   // Monday after Pentecost
+    return feastAdd_(easter, 49 + (FEAST_DOW_[m[1]] || 7));
+  }
+  if ((m = low.match(/^last friday of (the )?(denha|nativity)$/))) {
+    if (m[2] === "denha") return feastAdd_(easter, -49 - 2);                            // Friday before the Great Fast begins
+    var d = new Date(year, 0, 5);                                                        // last Friday before Epiphany (Jan 6)
+    while (d.getDay() !== 5) d = feastAdd_(d, -1);
+    return d;
+  }
+  if ((m = low.match(new RegExp("^" + ORD + " " + DOW + " of (?:the )?(denha|resurrection|apostles|kaitha|nativity|dedication of the church)$")))) {
+    var n = FEAST_ORD_[m[1]], dow = FEAST_DOW_[m[2]], season = m[3], start;
+    if (season === "denha") {
+      if (dow !== 5) return null;
+      return feastAdd_(feastOnOrAfter_(year, 0, 6, 5), 7 * (n - 1));
+    }
+    if (season === "resurrection") start = easter;
+    else if (season === "apostles") start = feastAdd_(easter, 49);
+    else if (season === "kaitha") start = feastAdd_(easter, 98);
+    else if (season === "nativity") start = feastOnOrAfter_(year, 11, 26, 0);
+    else start = feastAdd_(feastOnOrAfter_(year, 10, 27, 0), -28);                      // Dedication of the Church: 4 weeks before Annunciation
+    return feastAdd_(start, 7 * (n - 1) + dow);
+  }
+  return null;
+}
+
+function parseFeastsCSV(text) {
+  var out = [];
+  parseSheetObjects(text).forEach(function (r) {
+    var title = String(r.title || "").replace(/\s+/g, " ").trim();
+    var date  = String(r.date || "").replace(/\s+/g, " ").trim();
+    if (!title || !date) return;
+    out.push({
+      date: date,
+      type: String(r.type || "").replace(/\s+/g, " ").trim(),
+      title: title,
+      resolved: String(r.resolveddate || r.resolved || "").trim()
+    });
+  });
+  return out;
+}
+
+// All feast entries that fall in `year`, merged per date → [{date:"YYYY-MM-DD", title, obligation}]
+function buildFeastYear_(rows, year) {
+  var byDate = {}, order = [];
+  rows.forEach(function (row) {
+    var dates = [], exact = parseFeastExactDates_(row.resolved).filter(function (d) { return d.getFullYear() === year; });
+    if (exact.length) {
+      dates = exact;
+    } else {
+      var md = parseFeastMonthDay_(row.date);
+      if (md) {
+        var dt = new Date(year, md.m, md.d);
+        if (dt.getMonth() === md.m) dates = [dt];                                       // skips Feb 29 in non-leap years
+      } else {
+        var rd = feastResolveRule_(row.date, row.title, year);
+        if (rd) dates = [rd];
+      }
+    }
+    var obligation = /obligation/i.test(row.type);
+    dates.forEach(function (dt) {
+      var key = feastFmt_(dt);
+      if (!byDate[key]) { byDate[key] = []; order.push(key); }
+      byDate[key].push({ title: row.title, type: row.type, obligation: obligation, norm: feastNorm_(row.title) });
+    });
+  });
+
+  var out = [];
+  order.sort().forEach(function (key) {
+    var list = byDate[key], kept = [], seen = {};
+    var ob = null;
+    list.forEach(function (e) { if (!ob && e.obligation) ob = e; });
+    if (ob) {
+      // A day of obligation is the same celebration as the major-feast rows of that day
+      // (Christmas, Dneha/Epiphany, Ascension, Assumption…), so those collapse into it.
+      // Saints' days that merely share the date are kept alongside.
+      kept.push(ob); seen[ob.norm] = true;
+      list.forEach(function (e) {
+        if (e.obligation || seen[e.norm]) return;
+        if (/our lord|marian|important/i.test(e.type)) return;
+        seen[e.norm] = true; kept.push(e);
+      });
+    } else {
+      list.forEach(function (e) { if (!seen[e.norm]) { seen[e.norm] = true; kept.push(e); } });
+    }
+    kept.forEach(function (e) { out.push({ date: key, title: e.title, obligation: !!e.obligation }); });
+  });
+  return out;
+}
+
+// Holds the sheet rows and answers "what feasts fall on this date?" (builds each year once)
+function createFeastStore() {
+  var rows = [], years = {};
+  function year(y) {
+    if (!years[y]) {
+      var map = {};
+      buildFeastYear_(rows, y).forEach(function (e) { (map[e.date] = map[e.date] || []).push(e); });
+      years[y] = map;
+    }
+    return years[y];
+  }
+  return {
+    setRows: function (r) { rows = r || []; years = {}; },
+    count: function () { return rows.length; },
+    on: function (dateStr) { return year(+dateStr.slice(0, 4))[dateStr] || []; }
+  };
+}
+
+// Cached copy first (instant), then the live sheet; an empty/failed response never wipes what is cached
+function loadFeastRows(onData) {
+  if (!CONFIG.syroDatesSheetUrl) return;
+  try {
+    var cached = JSON.parse(localStorage.getItem(FEASTS_CACHE_KEY) || "null");
+    if (cached && cached.length) onData(cached);
+  } catch (e) {}
+  fetch(CONFIG.syroDatesSheetUrl)
+    .then(function (res) { if (!res.ok) throw new Error("HTTP " + res.status); return res.text(); })
+    .then(function (csv) {
+      var rows = parseFeastsCSV(csv);
+      if (!rows.length) return;
+      try { localStorage.setItem(FEASTS_CACHE_KEY, JSON.stringify(rows)); } catch (e) {}
+      onData(rows);
+    })
+    .catch(function () {});
+}
+
+// One list line: "Oct 4: St. Francis Assisi"  /  "Aug 15: Assumption of … (Obligation)"
+function feastItemHtml_(e) {
+  var p = e.date.split("-");
+  var label = FEAST_MON_NAMES_[+p[1] - 1] + " " + (+p[2]);
+  return '<li class="hg-feast' + (e.obligation ? ' hg-feast--obligation' : '') + '">' +
+    '<span class="hg-feast-date">' + label + ':</span> ' +
+    '<span class="hg-feast-name">' + escapeHtml(e.title) + '</span>' +
+    (e.obligation ? ' <span class="hg-feast-tag">(Obligation)</span>' : '') +
+    '</li>';
+}
+
+/* HOME PAGE — "Feast Days This Week" (Sunday → Saturday) inside the Announcements card */
+function initHomeFeasts() {
+  var wrap = document.getElementById("hgFeasts");
+  var list = document.getElementById("hgFeastsList");
+  if (!wrap || !list) return;
+  var store = createFeastStore();
+
+  function render() {
+    var now = new Date();
+    var sunday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
+    var items = [];
+    for (var i = 0; i < 7; i++) {
+      store.on(feastFmt_(feastAdd_(sunday, i))).forEach(function (e) { items.push(e); });
+    }
+    list.innerHTML = items.map(feastItemHtml_).join("");
+    wrap.hidden = !items.length;
+    ANNOUNCE_STATE.feasts = items.length > 0;
+    refreshAnnounceCard();
+  }
+
+  loadFeastRows(function (rows) { store.setRows(rows); render(); });
+}
+
+/* ─────────────────────────────────────────────────────
+   BIBLE BOOK NAMES — the readings sheet uses short forms ("Rom 5:20",
+   "1 Jn 3:1"); the site shows full names so children and newcomers can
+   follow along. The four Gospels deliberately stay short (Mt, Mk, Lk, Jn).
+   Display-only: sheet data is untouched. Unknown abbreviations are left
+   exactly as they came.
+   ───────────────────────────────────────────────────── */
+var BIBLE_BOOKS = (function () {
+  var map = {};
+  function add(full, keys) { keys.split(" ").forEach(function (k) { map[k] = full; }); }
+  // Old Testament
+  add("Genesis", "gen gn");
+  add("Exodus", "ex exo exod");
+  add("Leviticus", "lev lv");
+  add("Numbers", "num nm nb");
+  add("Deuteronomy", "deu deut dt");
+  add("Joshua", "jos josh");
+  add("Judges", "jgs judg jdg");
+  add("Ruth", "ru ruth");
+  add("1 Samuel", "1sam 1sm 1sa");        add("2 Samuel", "2sam 2sm 2sa");
+  add("1 Kings", "1kgs 1kings 1ki 1kg");  add("2 Kings", "2kgs 2kings 2ki 2kg");
+  add("1 Chronicles", "1chr 1ch 1chron"); add("2 Chronicles", "2chr 2ch 2chron");
+  add("Ezra", "ezr ezra");
+  add("Nehemiah", "neh");
+  add("Tobit", "tob tb");
+  add("Judith", "jdt");
+  add("Esther", "esth est");
+  add("1 Maccabees", "1macc 1mac 1mc");   add("2 Maccabees", "2macc 2mac 2mc");
+  add("Job", "job");
+  add("Psalms", "ps psa pss psalm psalms");
+  add("Proverbs", "prov pr prv");
+  add("Ecclesiastes", "eccl eccles qoh");
+  add("Song of Songs", "song sg sos");
+  add("Wisdom", "wis ws");
+  add("Sirach", "sir");
+  add("Isaiah", "is isa");
+  add("Jeremiah", "jer");
+  add("Lamentations", "lam");
+  add("Baruch", "bar");
+  add("Ezekiel", "ez eze ezek");
+  add("Daniel", "dan dn");
+  add("Hosea", "hos");
+  add("Joel", "joel jl");
+  add("Amos", "am amos");
+  add("Obadiah", "obad ob");
+  add("Jonah", "jon jonah");
+  add("Micah", "mic mich");
+  add("Nahum", "nah");
+  add("Habakkuk", "hab");
+  add("Zephaniah", "zeph zep");
+  add("Haggai", "hag");
+  add("Zechariah", "zech zec");
+  add("Malachi", "mal");
+  // Gospels — kept short on purpose
+  add("Mt", "mt mat matt");
+  add("Mk", "mk mar mrk");
+  add("Lk", "lk luk");
+  add("Jn", "jn joh");
+  // Acts and the letters
+  add("Acts of the Apostles", "act acts");
+  add("Romans", "rom rm");
+  add("1 Corinthians", "1cor 1co");        add("2 Corinthians", "2cor 2co");
+  add("Galatians", "gal");
+  add("Ephesians", "eph");
+  add("Philippians", "phil php");
+  add("Colossians", "col");
+  add("1 Thessalonians", "1thess 1thes 1th"); add("2 Thessalonians", "2thess 2thes 2th");
+  add("1 Timothy", "1tim 1ti");            add("2 Timothy", "2tim 2ti");
+  add("Titus", "tit titus");
+  add("Philemon", "phlm philem phm");
+  add("Hebrews", "heb hb");
+  add("James", "jas jac jam");
+  add("1 Peter", "1pet 1pt 1pe");          add("2 Peter", "2pet 2pt 2pe");
+  add("1 John", "1jn 1joh 1jo");           add("2 John", "2jn 2joh 2jo");  add("3 John", "3jn 3joh 3jo");
+  add("Jude", "jude jud");
+  add("Revelation", "rev rv");
+  return map;
+})();
+
+function expandBookNames(ref) {
+  return String(ref == null ? "" : ref).replace(
+    /(^|[\s(+;,&\/])((?:[1-3]\s?)?[A-Za-z]{1,7})\.?\s*(?=\d)/g,
+    function (all, pre, token) {
+      var full = BIBLE_BOOKS[token.toLowerCase().replace(/[\s.]/g, "")];
+      return full ? pre + full + " " : all;
+    }
+  );
 }
