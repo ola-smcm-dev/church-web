@@ -1305,30 +1305,59 @@ body.sticky-visible .hero-nav-drawer { top: calc(var(--topbar-height) + 62px); }
 
 .rd-lang-btn.is-active { background: var(--navy); color: var(--gold-light); }
 
+/* Celebration tabs: ONE row of tappable pills. On narrow screens the row
+   scrolls sideways (swipe) instead of stacking, and a soft fade on the
+   right edge shows there is more (.has-more is set from JS). */
 .rd-tabs {
   display: flex;
-  flex-wrap: wrap;
-  gap: 1.1rem;
-  border-bottom: 1px solid var(--cream-dark);
-  margin-bottom: .8rem;
+  flex-wrap: nowrap;
+  gap: .5rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  padding: .15rem .1rem .45rem;
+  margin: 0 -.1rem .15rem;
 }
+.rd-tabs::-webkit-scrollbar { display: none; }
 .rd-tabs[hidden] { display: none; }
+.rd-tabs.has-more {
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 34px), transparent);
+          mask-image: linear-gradient(to right, #000 calc(100% - 34px), transparent);
+}
+.rd-tabs.has-more.at-end { -webkit-mask-image: none; mask-image: none; }
 
 .rd-tab-btn {
-  border: none;
-  background: none;
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+  white-space: nowrap;
   font-family: var(--font-body);
-  font-size: .82rem;
+  font-size: .8rem;
   font-weight: 700;
-  color: var(--text-muted);
-  padding: 0 0 .55rem;
-  margin-bottom: -1px;
-  border-bottom: 2px solid transparent;
+  line-height: 1.2;
+  color: var(--navy);
+  background: #fff;
+  border: 1.5px solid var(--navy-light);
+  border-radius: 999px;
+  padding: .45rem .9rem;
   cursor: pointer;
-  text-align: left;
+  transition: background var(--transition), color var(--transition), border-color var(--transition);
+}
+.rd-tab-btn:hover { background: var(--cream); }
+.rd-tab-btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.rd-tab-btn.is-active {
+  background: var(--navy);
+  border-color: var(--navy);
+  color: var(--gold-light);
+  cursor: default;
 }
 
-.rd-tab-btn.is-active { color: var(--navy); border-bottom-color: var(--gold); }
+/* Exactly two celebrations: they split the row evenly and the names wrap, so both are fully visible without swiping */
+.rd-tabs--two .rd-tab-btn { flex: 1 1 0; min-width: 0; white-space: normal; text-align: center; }
+
+/* "Tap a celebration…" hint — only shown while the tabs are */
+.rd-tabs-hint { display: none; margin: 0 0 .7rem; font-size: .72rem; color: var(--text-muted); font-style: italic; }
+.rd-tabs:not([hidden]) + .rd-tabs-hint { display: block; }
 
 .rd-body { display: flex; flex-direction: column; gap: .55rem; }
 

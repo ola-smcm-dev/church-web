@@ -1159,6 +1159,7 @@ function createReadingCard(els) {
     els.season.hidden = false;
     els.badge.hidden = !entry.important;
     els.tabs.hidden = entries.length <= 1;
+    updateTabsFade();
 
     var readings = entry.readings || [];
     els.body.innerHTML = readings.map(function (r, i) {
@@ -1205,6 +1206,7 @@ function createReadingCard(els) {
     els.tabs.innerHTML = "";
     if (entries.length > 1) {
       els.tabs.hidden = false;
+      els.tabs.classList.toggle("rd-tabs--two", entries.length === 2);   // two celebrations share the row, names wrap if needed
       entries.forEach(function (entry, i) {
         var btn = document.createElement("button");
         btn.type = "button";
@@ -1222,11 +1224,25 @@ function createReadingCard(els) {
         });
         els.tabs.appendChild(btn);
       });
+      updateTabsFade();
     } else {
       els.tabs.hidden = true;
     }
 
     renderBody();
+  }
+
+  // Soft fade on the right edge of the celebration row while more tabs are off-screen to the swipe side
+  function updateTabsFade() {
+    var t = els.tabs;
+    if (!t || t.hidden) return;
+    var more = t.scrollWidth > t.clientWidth + 2;
+    t.classList.toggle("has-more", more);
+    t.classList.toggle("at-end", more && t.scrollLeft + t.clientWidth >= t.scrollWidth - 2);
+  }
+  if (els.tabs) {
+    els.tabs.addEventListener("scroll", updateTabsFade);
+    window.addEventListener("resize", updateTabsFade);
   }
 
   function load(dateStr) {
