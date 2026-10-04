@@ -3658,3 +3658,29 @@ a:hover > .pl-thumb .pl-play { transform: scale(1.1); background: var(--gold-lig
 }
 .up-pager-btn:hover .up-pager-arrow { background: var(--navy-light); transform: translateY(1px); }
 .up-pager-btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; border-radius: 999px; }
+
+
+/* ── Explore row (home page, under the quick-info cards) ── */
+.hg-explore {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: .5rem 1.6rem;
+  padding: .95rem 1.5rem;
+  background: #fff;
+  border-bottom: 1px solid var(--cream-dark);
+  font-size: .9rem;
+}
+.hg-explore-label { font-weight: 800; color: var(--navy); text-transform: uppercase; letter-spacing: .06em; font-size: .75rem; }
+.hg-explore a { color: var(--gold-dark); font-weight: 700; text-decoration: none; border-bottom: 1px solid transparent; }
+.hg-explore a::after { content: " \2192"; }
+.hg-explore a:hover { color: var(--navy); border-bottom-color: var(--navy); }
+@media (max-width: 680px) {
+  .hg-explore { flex-direction: column; gap: .55rem; text-align: center; }
+}
+
+/* Contact card: plain-text note row (parking / entrance) — not a link, so no hover colour */
+.hg-contact-row--note { cursor: default; }
+.hg-contact-row--note:hover { color: inherit; }
+.hg-contact-row--note .hg-contact-text { line-height: 1.4; font-size: .92em; }
