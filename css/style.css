@@ -699,21 +699,24 @@ body.sticky-visible .hero-nav-drawer { top: calc(var(--topbar-height) + 62px); }
 .hg-photo-overlay {
   position: absolute;
   bottom: 0; left: 0; right: 0;
-  padding: 2.5rem 2.5rem 1.75rem;
+  padding: 3rem 2.5rem 1.75rem;
+  /* darker, taller scrim so the text stays readable over the bright, busy photo */
   background: linear-gradient(to top,
-    rgba(10,16,35,0.88) 0%,
-    rgba(10,16,35,0.45) 60%,
+    rgba(10,16,35,0.92) 0%,
+    rgba(10,16,35,0.78) 45%,
+    rgba(10,16,35,0.4) 75%,
     transparent 100%);
   text-align: center;
 }
 
 .hg-photo-welcome {
   font-family: var(--font-body);
-  font-size: .8rem;
-  font-weight: 400;
+  font-size: clamp(.85rem, 1.1vw, 1rem);
+  font-weight: 700;
   letter-spacing: .2rem;
   text-transform: uppercase;
-  color: var(--gold-light);
+  color: #f6dc8c;
+  text-shadow: 0 1px 3px rgba(0,0,0,.9), 0 0 10px rgba(0,0,0,.7);
   margin-bottom: .3rem;
 }
 
@@ -723,15 +726,16 @@ body.sticky-visible .hero-nav-drawer { top: calc(var(--topbar-height) + 62px); }
   font-weight: 700;
   color: #fff;
   line-height: 1.2;
-  text-shadow: 0 2px 8px rgba(0,0,0,.5);
+  text-shadow: 0 2px 8px rgba(0,0,0,.7), 0 0 14px rgba(0,0,0,.5);
   margin-bottom: .3rem;
 }
 
 .hg-photo-sub {
   font-family: var(--font-body);
   font-size: clamp(.78rem, 1.1vw, .95rem);
-  font-weight: 300;
-  color: rgba(255,255,255,.85);
+  font-weight: 400;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0,0,0,.85);
   letter-spacing: .06rem;
 }
 
@@ -3684,3 +3688,8 @@ a:hover > .pl-thumb .pl-play { transform: scale(1.1); background: var(--gold-lig
 .hg-contact-row--note { cursor: default; }
 .hg-contact-row--note:hover { color: inherit; }
 .hg-contact-row--note .hg-contact-text { line-height: 1.4; font-size: .92em; }
+
+/* Hero text on phones: the photo is short, so keep the dark scrim compact (text stays readable without hiding the picture) */
+@media (max-width: 680px) {
+  .hg-photo-overlay { padding: 1.6rem 1rem .8rem; }
+}
