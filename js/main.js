@@ -124,6 +124,7 @@ document.addEventListener("DOMContentLoaded", function () {
   initHomeReading();
   initEvents();
   initPosters();
+  initPrayerBooks();
   initWhatsAppModal();
 });
 
@@ -209,51 +210,81 @@ function applyConfig() {
 }
 
 /* ─────────────────────────────────────────────────────
-   NAVIGATION — topbar hamburger toggles sticky bar
+   NAVIGATION — always-visible two-level menu
+   Desktop: drop-downs open on hover, or on click/tap/Enter of the little arrow.
+   Small screens: the menu button opens a panel; headings expand like an accordion.
+   The menu HTML itself is stamped into every page by tools/stamp_nav.py.
    ───────────────────────────────────────────────────── */
 function initNav() {
-  var topbarBtn    = document.getElementById("topbarHamburger");
-  var stickyBar    = document.getElementById("stickyBar");
-  var photo        = document.querySelector(".hg-photo");
-  var scrolledPast = false;
-  var menuOpen     = false;
+  var nav    = document.getElementById("mainNav");
+  var toggle = document.getElementById("navToggle");
+  if (!nav) return;
+  var items = Array.prototype.slice.call(nav.querySelectorAll(".nav-item.has-sub"));
 
-  function update() {
-    if (!stickyBar) return;
-    var visible = scrolledPast || menuOpen;
-    stickyBar.classList.toggle("visible", visible);
-    stickyBar.classList.toggle("sticky-bar--menu-open", menuOpen);
-    stickyBar.setAttribute("aria-hidden", visible ? "false" : "true");
-    document.body.classList.toggle("sticky-visible", visible);
-    if (topbarBtn) topbarBtn.setAttribute("aria-expanded", menuOpen ? "true" : "false");
+  function setItem(item, open) {
+    item.classList.toggle("open", open);
+    var b = item.querySelector(".nav-sub-toggle");
+    if (b) b.setAttribute("aria-expanded", open ? "true" : "false");
+  }
+  function closeSubs(except) {
+    items.forEach(function (it) { if (it !== except) setItem(it, false); });
+  }
+  function setPanel(open) {
+    nav.classList.toggle("open", open);
+    if (toggle) {
+      toggle.setAttribute("aria-expanded", open ? "true" : "false");
+      toggle.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+    }
+    if (!open) closeSubs();
   }
 
-  // Hamburger always toggles the expanded menu
-  if (topbarBtn) {
-    topbarBtn.addEventListener("click", function () {
-      menuOpen = !menuOpen;
-      update();
+  if (toggle) toggle.addEventListener("click", function () { setPanel(!nav.classList.contains("open")); });
+
+  items.forEach(function (item) {
+    var btn = item.querySelector(".nav-sub-toggle");
+    if (btn) btn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      var willOpen = !item.classList.contains("open");
+      closeSubs(item);
+      setItem(item, willOpen);
     });
-  }
-
-  // Close menu when any sticky nav link is clicked
-  if (stickyBar) {
-    stickyBar.querySelectorAll("a").forEach(function (link) {
-      link.addEventListener("click", function () {
-        menuOpen = false;
-        update();
-      });
+    // Hovering another heading hides a drop-down that was opened by click
+    item.addEventListener("mouseenter", function () { closeSubs(item); });
+    // Tabbing out of a heading closes its drop-down
+    item.addEventListener("focusout", function (e) {
+      if (e.relatedTarget && !item.contains(e.relatedTarget)) setItem(item, false);
     });
-  }
+  });
 
-  // Scroll: controls visibility; closes menu when scroll takes over
-  var heroHeight = photo ? photo.offsetHeight : 300;
-  window.addEventListener("scroll", function () {
-    var wasPast = scrolledPast;
-    scrolledPast = window.scrollY > heroHeight * 0.6;
-    if (scrolledPast && !wasPast) menuOpen = false; // hand off to scroll, close menu
-    update();
-  }, { passive: true });
+  // Tapping a link closes the panel (matters for same-page links such as Contact)
+  nav.addEventListener("click", function (e) {
+    var a = e.target.closest ? e.target.closest("a") : null;
+    if (a) { setPanel(false); }
+  });
+
+  // Click/tap anywhere else closes everything
+  document.addEventListener("click", function (e) {
+    if (!nav.contains(e.target) && !(toggle && toggle.contains(e.target))) setPanel(false);
+  });
+
+  // Escape closes; focus goes back to the control that was open
+  document.addEventListener("keydown", function (e) {
+    if (e.key !== "Escape" && e.key !== "Esc") return;
+    var openItem = items.filter(function (it) { return it.classList.contains("open"); })[0];
+    var panelOpen = nav.classList.contains("open");
+    if (!openItem && !panelOpen) return;
+    var focusTarget = openItem ? openItem.querySelector(".nav-sub-toggle") : toggle;
+    setPanel(false);
+    closeSubs();
+    if (focusTarget && focusTarget.offsetParent !== null) focusTarget.focus();
+  });
+
+  // Leaving the small-screen layout resets the panel
+  var mq = window.matchMedia ? window.matchMedia("(min-width: 1041px)") : null;
+  if (mq) {
+    var onMq = function (m) { if (m.matches) setPanel(false); };
+    if (mq.addEventListener) mq.addEventListener("change", onMq); else if (mq.addListener) mq.addListener(onMq);
+  }
 }
 
 /* ─────────────────────────────────────────────────────
@@ -792,6 +823,124 @@ function initPosters() {
     })
     .catch(function () {});
 }
+
+/* ─────────────────────────────────────────────────────
+   PRAYER BOOKS page (prayer-books.html)
+   Reads the book list straight from the Drive "Prayer Books" folder through
+   the Media API (Code.gs, ?action=books). Each sub-folder = one section;
+   each file = one book (file name = title, Drive "Description" = blurb,
+   first page of a PDF = cover). Nothing to edit on the website itself.
+   ───────────────────────────────────────────────────── */
+function initPrayerBooks() {
+  var root = document.getElementById("booksRoot");
+  if (!root || !CONFIG.mediaApiUrl) return;
+
+  var CACHE_KEY = "ola_books_v1";
+  var DEFAULT_NOTE = root.innerHTML;       // the static "coming soon" card
+  var allSections = [];
+
+  // "01 - Holy Qurbana_Malayalam.pdf" → "Holy Qurbana Malayalam"
+  function bookTitle(name) {
+    return String(name || "")
+      .replace(/\.[a-z0-9]{2,5}$/i, "")
+      .replace(/^\s*\d+\s*[-._)]*\s*(?=\D)/, "")
+      .replace(/_+/g, " ")
+      .replace(/\s{2,}/g, " ")
+      .trim();
+  }
+  function sectionTitle(name) {
+    return String(name || "").replace(/^\s*\d+\s*[-._)]*\s*(?=\D)/, "").trim() || "Prayer Books";
+  }
+  function slug(t) { return "bk-" + String(t).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); }
+  function openUrl(b) { return "https://drive.google.com/file/d/" + encodeURIComponent(b.id) + "/view"; }
+  function isGoogleDoc(b) { return /^application\/vnd\.google-apps\./.test(b.mime || ""); }
+  function openLink(b) {
+    return isGoogleDoc(b) ? "https://drive.google.com/open?id=" + encodeURIComponent(b.id) : openUrl(b);
+  }
+  function downloadLink(b) { return "https://drive.google.com/uc?export=download&id=" + encodeURIComponent(b.id); }
+  function typeLabel(b) {
+    var m = b.mime || "";
+    if (m === "application/pdf") return "PDF";
+    if (/^audio\//.test(m)) return "Audio";
+    if (/word|document/.test(m)) return "Document";
+    if (/^image\//.test(m)) return "Image";
+    return "";
+  }
+
+  function cardHtml(b) {
+    var title = bookTitle(b.name);
+    var thumb = "https://drive.google.com/thumbnail?id=" + encodeURIComponent(b.id) + "&sz=w400";
+    var type = typeLabel(b);
+    return '<article class="book-card" data-title="' + escapeHtml((title + " " + (b.desc || "")).toLowerCase()) + '">' +
+      '<a class="book-thumb" href="' + openLink(b) + '" target="_blank" rel="noopener noreferrer" aria-label="Open ' + escapeHtml(title) + '" tabindex="-1">' +
+        '<img src="' + thumb + '" alt="" loading="lazy" onerror="this.parentNode.classList.add(\'no-img\');this.remove()">' +
+        '<span class="book-thumb-fallback" aria-hidden="true">&#10013;</span>' +
+      '</a>' +
+      '<div class="book-body">' +
+        '<h3 class="book-title">' + escapeHtml(title) + '</h3>' +
+        (type ? '<span class="book-type">' + type + '</span>' : '') +
+        (b.desc ? '<p class="book-desc">' + escapeHtml(b.desc) + '</p>' : '') +
+        '<div class="book-actions">' +
+          '<a class="book-btn book-btn--primary" href="' + openLink(b) + '" target="_blank" rel="noopener noreferrer">Open</a>' +
+          (isGoogleDoc(b) ? '' : '<a class="book-btn" href="' + downloadLink(b) + '" target="_blank" rel="noopener noreferrer">Download</a>') +
+        '</div>' +
+      '</div>' +
+    '</article>';
+  }
+
+  function render(sections) {
+    allSections = sections || [];
+    var total = allSections.reduce(function (n, s) { return n + s.books.length; }, 0);
+    if (!total) { root.innerHTML = DEFAULT_NOTE; return; }
+
+    var chips = allSections.length > 1
+      ? '<nav class="books-jump" aria-label="Jump to a section">' + allSections.map(function (s) {
+          var t = sectionTitle(s.title);
+          return '<a href="#' + slug(t) + '">' + escapeHtml(t) + '</a>';
+        }).join("") + '</nav>' : "";
+    var search = total > 8
+      ? '<div class="books-search"><label class="visually-hidden" for="booksFilter">Search prayer books</label>' +
+        '<input id="booksFilter" type="search" placeholder="Search prayer books…" autocomplete="off"></div>' : "";
+
+    root.innerHTML = chips + search + allSections.map(function (s) {
+      var t = sectionTitle(s.title);
+      return '<section class="books-section" id="' + slug(t) + '" aria-label="' + escapeHtml(t) + '">' +
+        '<h3 class="books-section-title">' + escapeHtml(t) + '</h3>' +
+        '<div class="book-grid">' + s.books.map(cardHtml).join("") + '</div>' +
+      '</section>';
+    }).join("") + '<p class="books-empty" hidden>No prayer books match your search.</p>';
+
+    var input = document.getElementById("booksFilter");
+    if (input) input.addEventListener("input", function () {
+      var q = input.value.trim().toLowerCase(), shown = 0;
+      root.querySelectorAll(".books-section").forEach(function (sec) {
+        var any = false;
+        sec.querySelectorAll(".book-card").forEach(function (c) {
+          var hit = !q || c.getAttribute("data-title").indexOf(q) !== -1;
+          c.hidden = !hit; if (hit) { any = true; shown++; }
+        });
+        sec.hidden = !any;
+      });
+      root.querySelector(".books-empty").hidden = shown !== 0;
+    });
+  }
+
+  // cache-then-network, like the other Drive-driven sections
+  try {
+    var c = JSON.parse(localStorage.getItem(CACHE_KEY) || "null");
+    if (c && c.length) render(c);
+  } catch (e) {}
+
+  fetch(CONFIG.mediaApiUrl + "?action=books")
+    .then(function (res) { if (!res.ok) throw new Error("HTTP " + res.status); return res.json(); })
+    .then(function (data) {
+      if (!data || !data.ok) throw new Error((data && data.error) || "Bad response");
+      try { localStorage.setItem(CACHE_KEY, JSON.stringify(data.sections || [])); } catch (e) {}
+      render(data.sections || []);
+    })
+    .catch(function () {});
+}
+
 
 /* ─────────────────────────────────────────────────────
    WHATSAPP JOIN REQUEST MODAL
