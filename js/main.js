@@ -33,6 +33,15 @@ const CONFIG = {
   // Address of the CCD registration form. Clear it ("") to hide that button.
   ccdRegistrationUrl: "https://docs.google.com/forms/d/e/1FAIpQLSf0CmzCS2RXgI70863tB-Y9HohepDLqB0kAj3N6m1TzhTF5Gg/viewform",
 
+  // ── Mass offerings & hosted prayers (Join Us section) ──
+  // Address of the Google Form where parishioners request a Mass offering or sign up
+  // to host a prayer (Rosary, Way of the Cross...). Leave "" to hide the button.
+  massOfferingUrl: "https://forms.gle/uC3eV76QTXrfxFZm8",
+
+  // Published CSV of the WebAdmin "Mass Offerings" tab (Date | Name | Source) — who is
+  // offering the Holy Mass on a date. Shown in the calendar day popup. Leave "" to hide.
+  massOfferingsSheetUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSluQ2kZE_gDTLtpDOkBMlSUBLH9hroTEw3sm3g4AMwYAcyH1FHImxiTXldXHqttzvFnL7JG6K6dlIg/pub?gid=1423277853&single=true&output=csv",
+
   // ── Contact / WhatsApp requests → Google Sheet + email ──
   // Web app address (ends in /exec) of the Apps Script inside the WebAdmin sheet
   // that saves each request to the "WhatsApp Requests" tab and emails the parish.
@@ -149,6 +158,19 @@ function applyConfig() {
       ccdBtn.hidden = false;
       joinParts.push("sign up your child for Religious Education");
     } else ccdBtn.hidden = true;
+  }
+  var offerBtn = document.getElementById("joinOfferBtn");
+  if (offerBtn) {
+    if (CONFIG.massOfferingUrl) {
+      offerBtn.href   = CONFIG.massOfferingUrl;
+      offerBtn.hidden = false;
+      joinParts.push("offer a Mass or host a prayer");
+    } else offerBtn.hidden = true;
+  }
+  var joinCells = document.querySelector(".hg-join-cells");
+  if (joinCells) {
+    var shown = joinCells.querySelectorAll(".quick-btn:not([hidden])").length;
+    joinCells.classList.toggle("hg-join-cells--grid", shown >= 4);
   }
   // Any other button that points at the Religious Education form (e.g. the hero button on that page)
   document.querySelectorAll("[data-cfg-link='ccd']").forEach(function (a) {
@@ -1192,14 +1214,16 @@ function loadEventsCache() { try { var c = localStorage.getItem(EVENTS_CACHE_KEY
 function saveEventsCache(d) { try { localStorage.setItem(EVENTS_CACHE_KEY, JSON.stringify(d)); } catch (e) {} }
 
 function parseEventsCSV(csv) {
-  var lines = csv.trim().split("\n");
-  var list  = [];
-  for (var i = 1; i < lines.length; i++) {
-    var cols   = parseCSVLine(lines[i].trim());
+  // parseCSVRows() understands line breaks inside a quoted cell, so a multi-line
+  // Description no longer breaks the row (the old line-by-line split dropped such events).
+  var rows = parseCSVRows(csv);
+  var list = [];
+  for (var i = 1; i < rows.length; i++) {
+    var cols   = rows[i];
     var date   = (cols[0] || "").trim();
     var title  = (cols[1] || "").trim();
     var time   = (cols[2] || "").trim();
-    var desc   = (cols[3] || "").trim();
+    var desc   = (cols[3] || "").replace(/\r\n?/g, "\n").trim();
     var active = (cols[4] || "").trim().toLowerCase();
     if (date && title && active === "yes") list.push({ date: date, title: title, time: time, desc: desc });
   }
@@ -1216,6 +1240,42 @@ function loadEventsList(onData) {
   fetch(CONFIG.eventsSheetUrl)
     .then(function (res) { return res.text(); })
     .then(function (csv) { var fresh = parseEventsCSV(csv); saveEventsCache(fresh); onData(fresh); })
+    .catch(function () {});
+}
+
+/* ─────────────────────────────────────────────────────
+   MASS OFFERINGS — who is offering the Holy Mass on a date.
+   Source: the "Mass Offerings" tab of the WebAdmin sheet, published as CSV
+   (CONFIG.massOfferingsSheetUrl). The admin app keeps that tab up to date when a
+   request is approved or taken back; it holds only the date and the name to show
+   (never the intention). Columns: Date | Name | Source.
+   Shown in the calendar day popup under the Holy Mass event of that date —
+   deliberately NOT in the home page's Upcoming Events list.
+   ───────────────────────────────────────────────────── */
+var OFFERINGS_CACHE_KEY = "ola_mass_offerings_v1";
+
+function parseOfferingsCSV(csv) {
+  var map = {};
+  parseSheetObjects(csv).forEach(function (r) {
+    var date = String(r.date || "").trim(), name = String(r.name || "").trim();
+    var active = String(r.active == null ? "yes" : r.active).trim().toLowerCase();
+    if (!date || !name || active === "no") return;
+    (map[date] = map[date] || []).push(name);
+  });
+  return map;
+}
+
+// onData(map) gets the cached copy first (if any), then the fresh copy.
+function loadMassOfferings(onData) {
+  if (!CONFIG.massOfferingsSheetUrl) return;
+  try { var c = localStorage.getItem(OFFERINGS_CACHE_KEY); if (c) onData(JSON.parse(c)); } catch (e) {}
+  fetch(CONFIG.massOfferingsSheetUrl)
+    .then(function (res) { return res.text(); })
+    .then(function (csv) {
+      var fresh = parseOfferingsCSV(csv);
+      try { localStorage.setItem(OFFERINGS_CACHE_KEY, JSON.stringify(fresh)); } catch (e) {}
+      onData(fresh);
+    })
     .catch(function () {});
 }
 
@@ -1602,6 +1662,7 @@ function initEvents() {
   var viewYear  = today.getFullYear();
   var viewMonth = today.getMonth();
   var eventsMap = {};
+  var offerMap  = {};   // date -> [names] offering the Holy Mass (from the Mass Offerings tab)
 
   var DAYS   = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
   var MONTHS = ["January","February","March","April","May","June",
@@ -1677,19 +1738,33 @@ function initEvents() {
         escapeHtml(f.title) + '</div>';
     }).join("");
 
-    // Parish events
-    var evts = eventsMap[dateStr] || [];
-    if (evts.length) {
-      detailEvts.innerHTML = feastHtml + evts.map(function (ev) {
-        return '<div class="cal-detail-event">' +
-          (ev.time ? '<span class="cal-detail-event-time">' + escapeHtml(ev.time) + '</span>' : '') +
-          '<span class="cal-detail-event-title">' + escapeHtml(ev.title) + '</span>' +
-          (ev.desc ? '<p class="cal-detail-event-desc">' + escapeHtml(ev.desc) + '</p>' : '') +
-          '</div>';
-      }).join("");
-    } else {
-      detailEvts.innerHTML = feastHtml + '<p class="cal-detail-none">No parish events scheduled.</p>';
+    // Parish events. The names offering the Holy Mass go under the Holy Mass / Qurbana
+    // event of that date (or on a line of their own if that date has no such event).
+    var evts   = eventsMap[dateStr] || [];
+    var offers = offerMap[dateStr] || [];
+    var massAt = -1;
+    if (offers.length) {
+      for (var k = 0; k < evts.length; k++) {
+        if (/qurbana|holy mass/i.test(evts[k].title)) { massAt = k; break; }
+      }
     }
+    function offeredHtml() {
+      return '<div class="cal-detail-offered"><span class="cal-detail-offered-label">Mass offered by</span>' +
+        offers.map(function (n) { return '<span class="cal-detail-offered-name">' + escapeHtml(n) + '</span>'; }).join("") +
+        '</div>';
+    }
+    var evHtml = evts.map(function (ev, idx) {
+      return '<div class="cal-detail-event">' +
+        (ev.time ? '<span class="cal-detail-event-time">' + escapeHtml(ev.time) + '</span>' : '') +
+        '<span class="cal-detail-event-title">' + escapeHtml(ev.title) + '</span>' +
+        (ev.desc ? '<p class="cal-detail-event-desc">' + escapeHtml(ev.desc) + '</p>' : '') +
+        (idx === massAt ? offeredHtml() : '') +
+        '</div>';
+    }).join("");
+    if (offers.length && massAt < 0) {
+      evHtml += '<div class="cal-detail-event"><span class="cal-detail-event-title">Holy Mass</span>' + offeredHtml() + '</div>';
+    }
+    detailEvts.innerHTML = feastHtml + (evHtml || '<p class="cal-detail-none">No parish events scheduled.</p>');
 
     detail.hidden = false;
     detail.scrollIntoView({ behavior: "smooth", block: "nearest" });
@@ -1719,6 +1794,7 @@ function initEvents() {
   // Initial render (no events yet), then fill in events and feast days as they load
   renderCalendar();
   loadEventsList(buildMap);
+  loadMassOfferings(function (m) { offerMap = m; });
   loadFeastRows(function (rows) { feasts.setRows(rows); renderCalendar(); });
 }
 

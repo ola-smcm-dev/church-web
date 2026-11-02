@@ -587,13 +587,17 @@ address { font-style: normal; }
 /* Join Us card — pill above, a row of three plain icon cells below */
 .hg-join-cells {
   display: flex;
+  flex-wrap: wrap;
+  gap: 1px;                   /* the 1px gaps show the divider colour behind */
+  background: var(--cream-dark);
   margin-top: 1rem;
   border-radius: 8px;
   overflow: hidden;
 }
 
 .quick-btn {
-  flex: 1;
+  flex: 1 1 0;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -604,10 +608,10 @@ address { font-style: normal; }
   background: var(--cream);
   color: var(--text);
   text-decoration: none;
-  border-right: 1px solid var(--cream-dark);
   transition: background var(--transition), transform var(--transition);
 }
-.hg-join-cells .quick-btn:last-child { border-right: none; }
+/* With four or more buttons (main.js adds the class) they sit two per row instead of squeezing into one row */
+.hg-join-cells--grid .quick-btn { flex: 1 1 calc(50% - 1px); }
 .quick-btn[hidden] { display: none; }
 .quick-btn:hover { background: var(--cream-dark); }
 .quick-btn:focus-visible { outline: 3px solid var(--navy); outline-offset: -3px; }
@@ -1137,7 +1141,27 @@ address { font-style: normal; }
   color: var(--text-muted);
   width: 100%;
   margin: .1rem 0 0;
+  white-space: pre-line;      /* keep the line breaks typed in the sheet */
 }
+
+/* Who is offering the Holy Mass (from the Mass Offerings tab) */
+.cal-detail-offered {
+  width: 100%;
+  margin: .25rem 0 0;
+  padding-left: .7rem;
+  border-left: 3px solid var(--gold);
+  font-size: .82rem;
+  color: var(--text);
+}
+.cal-detail-offered-label {
+  display: block;
+  font-size: .7rem;
+  font-weight: 800;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--gold-dark);
+}
+.cal-detail-offered-name { display: block; line-height: 1.5; }
 
 .cal-detail-none {
   font-size: .82rem;
@@ -2461,16 +2485,6 @@ body.has-nav .hero-header { display: none; }
   z-index: 1;
 }
 
-.page-breadcrumb {
-  font-size: .8rem;
-  color: var(--gold-light);
-  margin-bottom: .6rem;
-  letter-spacing: .03em;
-}
-
-.page-breadcrumb a { color: var(--gold-light); }
-.page-breadcrumb a:hover { color: #fff; }
-
 .page-hero h1 {
   font-family: var(--font-heading);
   font-size: clamp(2rem, 4vw, 3rem);
@@ -2540,17 +2554,6 @@ body.has-nav .hero-header { display: none; }
    otherwise overrides the browser's default [hidden] behavior — needed on
    media.html, where this image starts hidden until JS finds a photo. */
 .page-hero-img[hidden] { display: none; }
-
-.page-hero--photo .page-hero-top {
-  position: absolute;
-  top: 1.1rem;
-  left: 0;
-  right: 0;
-  z-index: 2;
-  text-align: left;
-}
-
-.page-hero--photo .page-breadcrumb { margin: 0; text-shadow: 0 1px 6px rgba(0,0,0,.7); }
 
 .page-hero--photo .page-hero-inner {
   z-index: 2;

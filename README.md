@@ -65,5 +65,6 @@ The top bar + menu are identical on every page and are **stamped into each page'
 ## Notes for future edits
 
 - Internal links use plain relative filenames (`page.html`), not root-relative paths, so the site works both on GitHub Pages and when opened directly from disk.
+- Sub-pages have no visible breadcrumb line (the menu shows where you are); instead each carries a hidden `BreadcrumbList` JSON-LD block in `<head>` (Home › [Faith Formation ›] page) — copy one when adding a page.
 - Any new page should carry the standard SEO `<head>` block (canonical link, Open Graph tags including `og:site_name`, meta description) used on the existing pages, and be added to `sitemap.xml` (or excluded via `robots.txt` if it's meant to stay unlisted).
 - Feast days and days of obligation come from the `SyroMalabarDates` tab of the WebAdmin sheet (published as CSV; `CONFIG.syroDatesSheetUrl` in `js/main.js`). Fixed feasts (e.g. "December 25") repeat every year automatically; movable feasts (rule text such as "Third Friday of Apostles") are worked out from the Easter date. An optional `Resolved Date` column overrides the computed date for a given year. The old hand-typed `IMPORTANT_DATES` list is gone.
