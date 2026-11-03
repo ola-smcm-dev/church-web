@@ -40,7 +40,7 @@ const CONFIG = {
 
   // Published CSV of the WebAdmin "Mass Offerings" tab (Date | Name | Source) — who is
   // offering the Holy Mass on a date. Shown in the calendar day popup. Leave "" to hide.
-  massOfferingsSheetUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSluQ2kZE_gDTLtpDOkBMlSUBLH9hroTEw3sm3g4AMwYAcyH1FHImxiTXldXHqttzvFnL7JG6K6dlIg/pub?gid=1423277853&single=true&output=csv",
+  massOfferingsSheetUrl: "",
 
   // ── Contact / WhatsApp requests → Google Sheet + email ──
   // Web app address (ends in /exec) of the Apps Script inside the WebAdmin sheet
@@ -328,7 +328,7 @@ function initSmoothScroll() {
       // Offset by topbar + sticky bar height so content isn't hidden beneath them
       var topbar    = document.querySelector(".topbar");
       var stickyBar = document.getElementById("stickyBar");
-      var offset    = (topbar ? topbar.offsetHeight : 0) +
+      var offset    = seasonBarHeight() + (topbar ? topbar.offsetHeight : 0) +
                       (stickyBar && stickyBar.classList.contains("visible") ? stickyBar.offsetHeight : 0) +
                       8;
       var offsetTop = target.getBoundingClientRect().top + window.pageYOffset - offset;
@@ -342,6 +342,12 @@ function initSmoothScroll() {
    on phones some targets are desktop-only and hidden, so jump to the
    mobile version of that section instead of staying at the top.
    ───────────────────────────────────────────────────── */
+/* Height of the seasonal banner (js/seasonal.js) when it is showing, else 0 */
+function seasonBarHeight() {
+  var b = document.getElementById("olaSeasonBar");
+  return b ? b.offsetHeight : 0;
+}
+
 function initHashFallback() {
   var id = window.location.hash ? window.location.hash.slice(1) : "";
   if (!id) return;
@@ -353,7 +359,7 @@ function initHashFallback() {
     if (!fallback) return;
     var topbar    = document.querySelector(".topbar");
     var stickyBar = document.getElementById("stickyBar");
-    var offset    = (topbar ? topbar.offsetHeight : 0) +
+    var offset    = seasonBarHeight() + (topbar ? topbar.offsetHeight : 0) +
                     (stickyBar && stickyBar.classList.contains("visible") ? stickyBar.offsetHeight : 0) + 8;
     window.scrollTo({ top: fallback.getBoundingClientRect().top + window.pageYOffset - offset, behavior: "auto" });
   });
@@ -1267,7 +1273,11 @@ function parseOfferingsCSV(csv) {
 
 // onData(map) gets the cached copy first (if any), then the fresh copy.
 function loadMassOfferings(onData) {
-  if (!CONFIG.massOfferingsSheetUrl) return;
+  if (!CONFIG.massOfferingsSheetUrl) {
+    // Feature switched off: also wipe any copy a visitor's browser saved earlier, so no names linger.
+    try { localStorage.removeItem(OFFERINGS_CACHE_KEY); } catch (e) {}
+    return;
+  }
   try { var c = localStorage.getItem(OFFERINGS_CACHE_KEY); if (c) onData(JSON.parse(c)); } catch (e) {}
   fetch(CONFIG.massOfferingsSheetUrl)
     .then(function (res) { return res.text(); })
