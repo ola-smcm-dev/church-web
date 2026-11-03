@@ -42,7 +42,7 @@
   var IMG_A = "images/xmas-prepare", IMG_B = "images/xmas-christmas";
   var FIREWORKS_SECONDS = 60;      // full-screen show at midnight
   var ARRIVAL_BURST_SECONDS = 10;  // small burst when someone arrives later in Christmas week
-  var SPARKLE_EVERY_MS = 30000;    // a rare small burst after that
+  var SPARKLE_EVERY_MS = 5000;     // a small burst every few seconds after that
 
   var SS_TEST = "ola_season_test_v1", SS_HIDE = "ola_season_bar_hidden_v1";
   var root = document.documentElement;
