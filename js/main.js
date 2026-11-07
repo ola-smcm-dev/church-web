@@ -1224,8 +1224,9 @@ function parseEventsCSV(csv) {
   // Description no longer breaks the row (the old line-by-line split dropped such events).
   var rows = parseCSVRows(csv);
   var list = [];
-  // Optional "Show on Home" column (WebAdmin > Events): "No" keeps an event off the home page's
-  // Upcoming Events list. Blank / Yes = show. The calendar page ignores it. Found by heading, not position.
+  // "Show on Home" column (WebAdmin > Events): an event is listed in the home page's Upcoming Events
+  // ONLY when this says Yes. Blank or No = calendar page only. The calendar page ignores the column.
+  // Found by heading, not position.
   var homeIdx = -1;
   (rows[0] || []).forEach(function (h, k) { if (homeIdx < 0 && String(h).toLowerCase().replace(/[^a-z0-9]/g, "") === "showonhome") homeIdx = k; });
   for (var i = 1; i < rows.length; i++) {
@@ -1235,7 +1236,7 @@ function parseEventsCSV(csv) {
     var time   = (cols[2] || "").trim();
     var desc   = (cols[3] || "").replace(/\r\n?/g, "\n").trim();
     var active = (cols[4] || "").trim().toLowerCase();
-    var home   = !(homeIdx >= 0 && /^(no|n|false|0)$/i.test((cols[homeIdx] || "").trim()));
+    var home   = homeIdx >= 0 && /^(yes|y|true|1)$/i.test((cols[homeIdx] || "").trim());
     if (date && title && active === "yes") list.push({ date: date, title: title, time: time, desc: desc, home: home });
   }
   return list;
@@ -1630,7 +1631,7 @@ function initUpcoming() {
     var today    = new Date();
     var todayStr = today.getFullYear() + "-" + pad(today.getMonth() + 1) + "-" + pad(today.getDate());
     upcoming = all
-      .filter(function (ev) { return ev.date >= todayStr && ev.home !== false; })   // home === false: calendar-only (e.g. the weekly Qurbana / CCD)
+      .filter(function (ev) { return ev.date >= todayStr && ev.home === true; })   // only events marked Show on Home = Yes (the weekly Qurbana / CCD stay calendar-only)
       .sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; })
       .slice(0, MAX_EVENTS);
     renderPage();
