@@ -31,8 +31,40 @@
     toXmas: " to Christmas",
     merryEn: "Merry Christmas",
     merryMl: "ക്രിസ്തുമസ് ആശംസകൾ",
-    prepEn: "Let’s Prepare Our Hearts To Welcome Jesus",
-    prepMl: "യേശുവിനെ സ്വീകരിക്കാൻ നമ്മുടെ ഹൃദയങ്ങളെ ഒരുക്കാം",
+    /* One short prayer per day before Christmas — English only, to keep the pop-up small.
+       Listed in date order, and the LAST line is always Christmas Eve. The lines below are
+       dated for 2026 (the season starts Sun Nov 29 = 26 days to go). In a year when the
+       season starts a few days earlier the first prayer is simply shown for those extra
+       days. Edit, replace or reword any line freely; keep each to about 25 words so it
+       fits. Keep the quotes and the commas. */
+    prayers: [
+      "Lord Jesus, as this season of waiting begins, open our hearts to listen for You each day. Amen.", // Nov 29  (26 days to Christmas)
+      "Heavenly Father, quiet the noise within us, so that we may hear Your gentle voice calling us closer to You. Amen.", // Nov 30  (25 days to Christmas)
+      "Lord Jesus, teach us to wait with hope, trusting that You are always near. Amen.", // Dec 1  (24 days to Christmas)
+      "Holy Spirit, prepare a place in our hearts where Jesus can be born again this Christmas. Amen.", // Dec 2  (23 days to Christmas)
+      "Lord, make us humble, so that we welcome You with open hearts and empty hands, as the shepherds did. Amen.", // Dec 3  (22 days to Christmas)
+      "Father, forgive what keeps us from You. Cleanse our hearts, so that we may receive Your Son with joy. Amen.", // Dec 4  (21 days to Christmas)
+      "Jesus, Light of the World, shine into the dark corners of our hearts and homes. Amen.", // Dec 5  (20 days to Christmas)
+      "Mary, our Mother, teach us to say yes to God as you did, with a trusting heart. Amen.", // Dec 6  (19 days to Christmas)
+      "Lord, help us to pray every day, even when we are busy, so that our hearts are ready for You. Amen.", // Dec 7  (18 days to Christmas)
+      "Father, give us courage to be faithful in small things, as Mary was faithful to Your word. Amen.", // Dec 8  (17 days to Christmas)
+      "Jesus, free us from worry and hurry. Fill our families with Your peace this Christmas season. Amen.", // Dec 9  (16 days to Christmas)
+      "Lord, make our hearts grateful. Thank You for the many gifts we receive each day. Amen.", // Dec 10  (15 days to Christmas)
+      "Holy Spirit, help us to listen to our children, our parents and one another with patience and love. Amen.", // Dec 11  (14 days to Christmas)
+      "Father, bless every family preparing for Christmas, and be close to those who feel alone. Amen.", // Dec 12  (13 days to Christmas)
+      "Lord Jesus, give us the joy of Mary, who hurried to serve others. Make us quick to help. Amen.", // Dec 13  (12 days to Christmas)
+      "Jesus, teach us to forgive as You forgive. Heal what is broken between us before Christmas. Amen.", // Dec 14  (11 days to Christmas)
+      "Father, open our eyes to the needs around us, and make us generous with our time and our gifts. Amen.", // Dec 15  (10 days to Christmas)
+      "Lord, bless our parish family. Make us one heart as we prepare to welcome Your Son. Amen.", // Dec 16  (9 days to Christmas)
+      "Jesus, You came for the poor and the lost. Make our hearts as simple and welcoming as Your manger. Amen.", // Dec 17  (8 days to Christmas)
+      "Holy Spirit, fill us with the joy that no gift can give: the joy of knowing that God is with us. Amen.", // Dec 18  (7 days to Christmas)
+      "Father, we bring You our worries and our hopes. Help us to trust Your plan, as Saint Joseph did. Amen.", // Dec 19  (6 days to Christmas)
+      "Saint Joseph, quiet and faithful guardian, pray for us to listen to God and obey with a peaceful heart. Amen.", // Dec 20  (5 days to Christmas)
+      "Lord Jesus, only a few days remain. Come into our hearts, our homes and our world. Amen.", // Dec 21  (4 days to Christmas)
+      "Prince of Peace, bring peace to every home, to every nation and to every troubled heart. Amen.", // Dec 22  (3 days to Christmas)
+      "Come, Lord Jesus. We are ready to welcome You with love, with gratitude and with joy. Amen.", // Dec 23  (2 days to Christmas)
+      "Tonight Heaven comes down to earth. Lord Jesus, be born in our hearts, and stay with us always. Amen."  // Dec 24  (1 day to Christmas)
+    ],
     // Shown under the picture from Dec 25 (PLACEHOLDERS — replace with the parish's own message)
     xmasEn: "Glory to God in the Highest!",
     xmasMl: "അത്യുന്നതങ്ങളിൽ ദൈവത്തിനു മഹത്വം",
@@ -329,6 +361,15 @@
   }
   function wantsLayerB(ph) { return ph.p === "xmas" || ph.p === "last" || (ph.p === "count" && ph.days <= 1); }
 
+  /* today's prayer: counted back from Christmas Eve, so the last prayer is always Dec 24 */
+  function prayerFor(ph) {
+    var list = TXT.prayers, n = list.length;
+    if (!n) return "";
+    var days = ph.p === "count" ? ph.days : 1;                  // last minute of Dec 24 / Christmas = the final prayer
+    var i = n - days;
+    return list[i < 0 ? 0 : i > n - 1 ? n - 1 : i];
+  }
+
   function openPop(ph) {
     if (!isHome || pop || !document.body) return;
     var wrap = document.createElement("div"), dim = document.createElement("div");
@@ -336,17 +377,17 @@
     wrap.className = "xs-wrap"; wrap.id = "olaXmasPop";
     wrap.setAttribute("role", "dialog"); wrap.setAttribute("aria-modal", "true"); wrap.setAttribute("aria-label", "Christmas countdown");
     wrap.innerHTML =
-      '<div class="xs-card">' +
+      '<div class="xs-card" tabindex="-1">' +
         '<div class="xs-art">' + picture(IMG_A, TXT.altA, "xs-pic-a") +
           '<div class="xs-scrim"></div><canvas class="xs-snow" aria-hidden="true"></canvas>' +
           '<div class="xs-top">' +
             '<div class="xs-count"><span class="xs-num"></span><span class="xs-lab"></span></div>' +
             '<div class="xs-merry"><span class="xs-m1">' + TXT.merryEn + '</span><span class="xs-m2" lang="ml">' + TXT.merryMl + '</span></div>' +
           '</div>' +
-          '<button type="button" class="xs-close">Close</button>' +
+          '<button type="button" class="xs-close" aria-label="Close"><span class="xs-x"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></span></button>' +
         '</div>' +
         '<div class="xs-body">' +
-          '<div class="xs-msg xs-msg-a"><p class="xs-en">' + TXT.prepEn + '</p><p class="xs-ml" lang="ml">' + TXT.prepMl + '</p></div>' +
+          '<div class="xs-msg xs-msg-a"><p class="xs-pr"></p></div>' +
           '<div class="xs-msg xs-msg-b"><p class="xs-en">' + TXT.xmasEn + '</p><p class="xs-ml" lang="ml">' + TXT.xmasMl + '</p></div>' +
         '</div>' +
       '</div>';
@@ -369,7 +410,7 @@
       dim.classList.add("xs-open"); wrap.classList.add("xs-open");
       pop.snow = Snow(wrap.querySelector(".xs-snow"), { max: small() ? 40 : 70, density: 2600, r0: 1, r1: 3, v0: 18, v1: 48 });
       pop.snow.start();
-      try { pop.closeBtn.focus({ preventScroll: true }); } catch (e) {}
+      try { pop.card.focus({ preventScroll: true }); } catch (e) {}   // the card, not the × — so no focus ring shows on every visit; Tab still reaches the ×
     }
     var img = wrap.querySelector(".xs-pic-a img");
     if (img.complete) show(); else { img.addEventListener("load", show); img.addEventListener("error", show); setTimeout(show, 1500); }
@@ -393,6 +434,10 @@
     var x = ph.p === "xmas";
     if (wantsLayerB(ph)) popLayerB();
     pop.wrap.classList.toggle("xs-is-xmas", x);
+    if (!x) {
+      var pr = pop.wrap.querySelector(".xs-pr"), t = prayerFor(ph);
+      if (pr && pr.textContent !== t) pr.textContent = t;
+    }
     var a = pop.wrap.querySelector(".xs-pic-a"), b = pop.wrap.querySelector(".xs-pic-b");
     if (a) a.setAttribute("aria-hidden", x ? "true" : "false");
     if (b) b.setAttribute("aria-hidden", x ? "false" : "true");
