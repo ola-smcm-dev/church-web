@@ -3861,7 +3861,7 @@ html:not(.season-on) .season-bar { display: none; }
 .xs-top {
   position: absolute; top: 0; left: 0; right: 0;
   display: grid; justify-items: center; text-align: center;
-  padding: 8px 74px 0; pointer-events: none;
+  padding: 8px 52px 0; pointer-events: none;
   color: #f7e2a0;
   text-shadow: 0 2px 10px rgba(5,9,32,.9), 0 0 3px rgba(0,0,0,.65);
 }
@@ -3888,23 +3888,30 @@ html:not(.season-on) .season-bar { display: none; }
 .xs-m2 { margin-top: 2px; font-weight: 700; font-size: .75rem; font-size: clamp(.7rem, 3.1cqw, 1.1rem); }
 .xs-last .xs-num { color: #fff; }
 
-/* the Close button: a clear, labelled pill at the top-right of the picture */
+/* the Close button: a small, quiet "×" in a soft round dot at the top-right of the picture.
+   The visible dot is small (28px) but the tappable area stays a comfortable 44px. */
 .xs-close {
-  position: absolute; top: 8px; right: 8px; z-index: 3;
-  min-height: 40px; min-width: 66px; padding: 0 16px;
-  background: #fff; color: var(--navy-dark);
-  border: 2px solid var(--gold); border-radius: 999px;
-  font-family: var(--font-body); font-weight: 800; font-size: .86rem; letter-spacing: .02em;
-  cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,.4);
+  position: absolute; top: 3px; right: 3px; z-index: 3;
+  width: 44px; height: 44px; padding: 0; margin: 0;
+  display: grid; place-items: center;
+  background: transparent; border: 0; cursor: pointer;
+  color: #fff; -webkit-tap-highlight-color: transparent;
 }
-.xs-close:hover { background: #fff6d8; }
+.xs-x {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: rgba(8,12,36,.5);
+  box-shadow: 0 0 0 1px rgba(255,255,255,.28);
+  transition: background .15s ease;
+}
+.xs-close:hover .xs-x { background: rgba(8,12,36,.78); }
 @media (max-width: 360px) {
-  .xs-close { min-height: 36px; min-width: 56px; padding: 0 11px; font-size: .78rem; top: 6px; right: 6px; }
-  .xs-top { padding: 8px 66px 0; }
+  .xs-top { padding: 8px 50px 0; }
   .xs-m1 { font-size: 1.05rem; }
   .xs-m2 { font-size: .68rem; }
 }
-.xs-close:focus-visible { outline: 2px solid var(--gold-light); outline-offset: 2px; }
+.xs-close:focus, .xs-card:focus { outline: none; }
+.xs-close:focus-visible .xs-x { outline: 2px solid var(--gold-light); outline-offset: 2px; }
 
 .xs-body {
   display: grid; text-align: center;
@@ -3920,9 +3927,14 @@ html:not(.season-on) .season-bar { display: none; }
   margin: 0; font-family: var(--font-heading); font-weight: 700; line-height: 1.25; color: #f6ecd0;
 }
 .xs-ml { margin: 4px 0 0; font-weight: 700; line-height: 1.45; color: #e0bb4a; }
+.xs-pr {
+  margin: 0; font-family: var(--font-heading); font-weight: 700; font-style: italic;
+  line-height: 1.38; color: #f6ecd0; font-size: .98rem;
+  max-width: 36em; margin-left: auto; margin-right: auto; text-wrap: balance;
+}
 .xs-body .xs-en, .xs-body .xs-ml { font-size: 1.02rem; }
 .xs-body .xs-ml { font-size: .88rem; }
-@media (min-width: 520px) { .xs-body .xs-en { font-size: 1.4rem; } .xs-body .xs-ml { font-size: 1.05rem; } .xs-body { padding: 16px 22px 20px; } }
+@media (min-width: 520px) { .xs-pr { font-size: 1.15rem; } .xs-body .xs-en { font-size: 1.4rem; } .xs-body .xs-ml { font-size: 1.05rem; } .xs-body { padding: 16px 22px 20px; } }
 
 /* ── Fireworks canvas ── */
 #olaFx { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 8001; pointer-events: none; }
