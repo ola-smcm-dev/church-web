@@ -1296,6 +1296,112 @@ function loadMassOfferings(onData) {
 }
 
 /* ─────────────────────────────────────────────────────
+   LITURGY DATA — the shared public repo ola-smcm-dev/liturgy-data
+   (https://github.com/ola-smcm-dev/liturgy-data, served by GitHub Pages).
+
+   Since 2026-11 the day-by-day readings, seasons, feast days and days
+   of obligation come from there instead of the Google Sheet / Apps
+   Script. A robot in that repo reads each new Panchangam when the
+   Liturgy Commission publishes it, checks it, and publishes it; the
+   TV/projector Qurbana app reads the same files.
+     index.json            years available, coverage, season names
+     days/<year>.json      one record per date
+     data/feast-rules.json fixed + movable feast days (rule engine below)
+   Network first (8 s), this browser's last good copy if the network
+   fails. While LITURGY_LEGACY_FALLBACK is true, a date the repo does
+   not have is still tried against the old Google Sheet pipeline
+   (remove the flag once the new data has proven itself).
+   All text from the repo is shown with textContent / escapeHtml.
+   ───────────────────────────────────────────────────── */
+var LITURGY_BASE = "https://ola-smcm-dev.github.io/liturgy-data/";
+var LITURGY_CACHE_PREFIX = "ola_lit_v1_";
+var LITURGY_TIMEOUT_MS = 8000;
+var LITURGY_LEGACY_FALLBACK = true;
+var liturgyMem_ = {};
+var liturgyRefreshing_ = {};
+
+function liturgyReadCache_(path) {
+  try { return JSON.parse(localStorage.getItem(LITURGY_CACHE_PREFIX + path) || "null"); } catch (e) { return null; }
+}
+
+// cb(json | null). Concurrent requests for one path share a single fetch; a failure is not remembered (next call retries).
+// swr = true: answer at once from this browser's copy when there is one, and refresh it in the background.
+function liturgyGet_(path, cb, swr) {
+  var m = liturgyMem_[path];
+  if (m && m.done) { cb(m.data); return; }
+  if (swr) {
+    var cached = liturgyReadCache_(path);
+    if (cached) {
+      cb(cached);
+      if (!liturgyRefreshing_[path]) {
+        liturgyRefreshing_[path] = true;
+        fetchReadingsJson_(LITURGY_BASE + path, LITURGY_TIMEOUT_MS)
+          .then(function (data) { try { localStorage.setItem(LITURGY_CACHE_PREFIX + path, JSON.stringify(data)); } catch (e) {} })
+          .catch(function () {});
+      }
+      return;
+    }
+  }
+  if (m) { m.waiting.push(cb); return; }
+  m = liturgyMem_[path] = { waiting: [cb], done: false, data: null };
+  function finish(data) {
+    var w = m.waiting; m.waiting = []; m.done = !!data; m.data = data;
+    if (!data) delete liturgyMem_[path];
+    w.forEach(function (f) { f(data); });
+  }
+  fetchReadingsJson_(LITURGY_BASE + path, LITURGY_TIMEOUT_MS)
+    .then(function (data) {
+      try { localStorage.setItem(LITURGY_CACHE_PREFIX + path, JSON.stringify(data)); } catch (e) {}
+      finish(data);
+    })
+    .catch(function () { finish(liturgyReadCache_(path)); });
+}
+
+// cb(daysMap | null, index | null) for a calendar year
+function liturgyYear_(year, cb) {
+  liturgyGet_("index.json", function (index) {
+    var info = index && index.years && index.years[String(year)];
+    if (!info || !/^days\/\d{4}\.json$/.test(info.file || "")) { cb(null, index || null); return; }
+    liturgyGet_(info.file, function (yr) { cb(yr && yr.days ? yr.days : null, index); });
+  });
+}
+
+// A group has 4 readings on Sundays/major feasts (Law, Prophets, Epistle, Gospel), 2 on weekdays (Epistle, Gospel),
+// 3 on Passion Friday (Law, Epistle, Gospel); any other count is shown as plain "Reading N".
+var LITURGY_SLOTS_ = { 2: ["Epistle", "Gospel"], 3: ["Law", "Epistle", "Gospel"], 4: ["Law", "Prophets", "Epistle", "Gospel"] };
+var LITURGY_TRIVIA_SPLIT_ = /(?=death anniversary of|patron[’']?s day of|episcopal ordination of)/i;
+var LITURGY_TRIVIA_START_ = /^\s*(?:death anniversary of|patron[’']?s day of|episcopal ordination of)/i;
+
+// Background trivia the parish does not want on the page (anniversaries, patron's days, ordinations) is dropped; the rest is kept.
+function liturgyCleanNotes_(notes) {
+  var blob = (notes || []).join(" ").replace(/\s+/g, " ").trim();
+  if (!blob) return "";
+  return blob.split(LITURGY_TRIVIA_SPLIT_)
+    .filter(function (seg) { return seg && !LITURGY_TRIVIA_START_.test(seg); })
+    .join(" ").replace(/\s+/g, " ").trim();
+}
+
+// Repo day record -> the shape the reading card renders: {season, entries:[{celebration, important, readings:[{slot,ref,title}], notes}]}
+function liturgyToCardData_(rec, index) {
+  if (!rec || !rec.celebrations || !rec.celebrations.length) return null;
+  var sk = index && index.seasons && index.seasons[rec.season];
+  var entries = rec.celebrations.map(function (c) {
+    var rd = c.readings || [], slots = LITURGY_SLOTS_[rd.length] || [];
+    return {
+      celebration: c.label || "Celebration",
+      important: /day of obligation|important/i.test((c.notes || []).join(" ")),
+      readings: rd.map(function (r, i) { return { slot: slots[i] || "", ref: r.ref || "", title: r.title || "" }; }),
+      notes: liturgyCleanNotes_(c.notes)
+    };
+  });
+  if (rec.check) {
+    // the robot could not read this day's page layout with full confidence
+    entries[0].notes = (entries[0].notes ? entries[0].notes + " " : "") + "Please also check the Liturgy Commission’s website for this day.";
+  }
+  return { season: sk ? sk.en : "", entries: entries };
+}
+
+/* ─────────────────────────────────────────────────────
    SYRO MALABAR DAILY READINGS — shared card controller.
 
    Sources data from the Panchangam-derived Google Sheet via its
@@ -1389,7 +1495,7 @@ function createReadingCard(els) {
     var readings = entry.readings || [];
     els.body.innerHTML = readings.map(function (r, i) {
       var slotName = READING_SLOT_LABELS[r.slot] || r.slot;
-      var label = "Reading " + (i + 1) + " (" + slotName + ")";
+      var label = "Reading " + (i + 1) + (slotName ? " (" + slotName + ")" : "");
       return '<div class="rd-row">' +
         '<span class="rd-row-label">' + escapeHtml(label) + '</span>' +
         '<span class="rd-row-text"><strong>' + escapeHtml(expandBookNames(r.ref || "")) + '</strong>' +
@@ -1479,6 +1585,22 @@ function createReadingCard(els) {
       return;
     }
 
+    // Repo data first; the old Google Sheet pipeline only for a date the repo does not have (or if the repo cannot be reached).
+    liturgyYear_(+dateStr.slice(0, 4), function (days, index) {
+      if (mySeq !== reqSeq) return;
+      var data = days && days[dateStr] ? liturgyToCardData_(days[dateStr], index) : null;
+      if (data) {
+        cache[dateStr] = data;
+        render(data, mySeq);
+      } else if (LITURGY_LEGACY_FALLBACK) {
+        loadLegacy(dateStr, mySeq);
+      } else {
+        showFallback();
+      }
+    });
+  }
+
+  function loadLegacy(dateStr, mySeq) {
     var url = READINGS_URL + "?date=" + encodeURIComponent(dateStr);
 
     fetchReadingsJson_(url, READINGS_FETCH_TIMEOUT_MS)
@@ -1686,8 +1808,17 @@ function initEvents() {
 
   function pad(n) { return n < 10 ? "0" + n : "" + n; }
 
+  // The published Panchangam (liturgy-data repo) for each year that is viewed: it overrides the rule engine for the dates it covers
+  var feastYearAsked = {};
+  function ensureFeastYear(y) {
+    if (feastYearAsked[y]) return;
+    feastYearAsked[y] = true;
+    liturgyYear_(y, function (days) { if (days) { feasts.setDays(days); renderCalendar(); } });
+  }
+
   // ── Render calendar grid ──
   function renderCalendar() {
+    ensureFeastYear(viewYear);
     var firstDay    = new Date(viewYear, viewMonth, 1).getDay();
     var daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
     monthLabel.textContent = MONTHS[viewMonth] + " " + viewYear;
@@ -2230,7 +2361,7 @@ function buildFeastYear_(rows, year) {
 
 // Holds the sheet rows and answers "what feasts fall on this date?" (builds each year once)
 function createFeastStore() {
-  var rows = [], years = {};
+  var rows = [], years = {}, days = {};
   function year(y) {
     if (!years[y]) {
       var map = {};
@@ -2239,15 +2370,51 @@ function createFeastStore() {
     }
     return years[y];
   }
+  // The published Panchangam is the authority for a date it covers (it moves a day of obligation when the feast falls on a
+  // Sunday, e.g. St Peter & Paul in 2025); the rule engine answers for every other date, any year.
+  function fromRecord(rec, dateStr) {
+    var out = (rec.feasts || []).map(function (f) { return { date: dateStr, title: f.title, obligation: !!f.obligation }; });
+    if (rec.obligation && !out.some(function (e) { return e.obligation; })) {
+      var label = "";
+      (rec.celebrations || []).forEach(function (c) {
+        if (!label && /obligation/i.test((c.notes || []).join(" "))) label = c.label;
+      });
+      out.unshift({ date: dateStr, title: label || "Day of Obligation", obligation: true });
+    }
+    return out;
+  }
   return {
     setRows: function (r) { rows = r || []; years = {}; },
+    setDays: function (m) { for (var k in m) if (Object.prototype.hasOwnProperty.call(m, k)) days[k] = m[k]; },
     count: function () { return rows.length; },
-    on: function (dateStr) { return year(+dateStr.slice(0, 4))[dateStr] || []; }
+    on: function (dateStr) {
+      return days[dateStr] ? fromRecord(days[dateStr], dateStr) : (year(+dateStr.slice(0, 4))[dateStr] || []);
+    }
   };
 }
 
-// Cached copy first (instant), then the live sheet; an empty/failed response never wipes what is cached
+// data/feast-rules.json in the liturgy-data repo -> the row shape the rule engine reads
+function feastRowsFromRepo_(json) {
+  var out = [];
+  ((json && json.rules) || []).forEach(function (r) {
+    var date = r.date ? "2000-" + r.date : String(r.rule || "");      // fixed feasts are "MM-DD" (the year is ignored)
+    var title = String(r.title || "").replace(/\s+/g, " ").trim();
+    if (date && title) out.push({ date: date, type: String(r.type || ""), title: title, resolved: "" });
+  });
+  return out;
+}
+
+// The repo's feast list (this browser's copy first, refreshed in the background); the old sheet only if the repo is unreachable
 function loadFeastRows(onData) {
+  liturgyGet_("data/feast-rules.json", function (json) {
+    var rows = feastRowsFromRepo_(json);
+    if (rows.length) onData(rows);
+    else if (LITURGY_LEGACY_FALLBACK) loadFeastRowsFromSheet_(onData);
+  }, true);
+}
+
+// Cached copy first (instant), then the live sheet; an empty/failed response never wipes what is cached
+function loadFeastRowsFromSheet_(onData) {
   if (!CONFIG.syroDatesSheetUrl) return;
   try {
     var cached = JSON.parse(localStorage.getItem(FEASTS_CACHE_KEY) || "null");
@@ -2296,6 +2463,13 @@ function initHomeFeasts() {
   }
 
   loadFeastRows(function (rows) { store.setRows(rows); render(); });
+
+  // the published Panchangam for this week's dates (the week can straddle New Year)
+  var nowD = new Date(), sun = new Date(nowD.getFullYear(), nowD.getMonth(), nowD.getDate() - nowD.getDay());
+  var yrs = {}; yrs[sun.getFullYear()] = 1; yrs[feastAdd_(sun, 6).getFullYear()] = 1;
+  Object.keys(yrs).forEach(function (y) {
+    liturgyYear_(+y, function (days) { if (days) { store.setDays(days); render(); } });
+  });
 }
 
 /* ─────────────────────────────────────────────────────
