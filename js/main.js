@@ -1366,6 +1366,23 @@ function liturgyYear_(year, cb) {
   });
 }
 
+// cb(daysMap | null) - the Malayalam layer (days-ml/<year>.json) for a calendar year; loaded only when a visitor asks for Malayalam
+function liturgyYearMl_(year, cb) {
+  liturgyGet_("index.json", function (index) {
+    var info = index && index.malayalam && index.malayalam.years && index.malayalam.years[String(year)];
+    if (!info || !/^days-ml\/\d{4}\.json$/.test(info.file || "")) { cb(null, index || null); return; }
+    liturgyGet_(info.file, function (yr) { cb(yr && yr.days ? yr.days : null, index); });
+  });
+}
+
+// Words on the card in Malayalam (the card's own wording - not data from the repo). DRAFT: to be proofread by a Malayalam reader.
+var LITURGY_ML_UI_ = {
+  reading: "\u0d35\u0d3e\u0d2f\u0d28",                                  // വായന
+  slots: { Law: "\u0d28\u0d3f\u0d2f\u0d2e\u0d02", Prophets: "\u0d2a\u0d4d\u0d30\u0d35\u0d3e\u0d1a\u0d15\u0d7c",   // നിയമം, പ്രവാചകർ
+           Epistle: "\u0d32\u0d47\u0d16\u0d28\u0d02", Gospel: "\u0d38\u0d41\u0d35\u0d3f\u0d36\u0d47\u0d37\u0d02" },       // ലേഖനം, സുവിശേഷം
+  obligation: "\u0d15\u0d1f\u0d2e\u0d41\u0d33\u0d4d\u0d33 \u0d26\u0d3f\u0d35\u0d38\u0d02"                 // കടമുള്ള ദിവസം (the repo's index.json has the same wording)
+};
+
 // A group has 4 readings on Sundays/major feasts (Law, Prophets, Epistle, Gospel), 2 on weekdays (Epistle, Gospel),
 // 3 on Passion Friday (Law, Epistle, Gospel); any other count is shown as plain "Reading N".
 var LITURGY_SLOTS_ = { 2: ["Epistle", "Gospel"], 3: ["Law", "Epistle", "Gospel"], 4: ["Law", "Prophets", "Epistle", "Gospel"] };
@@ -1457,6 +1474,11 @@ function createReadingCard(els) {
   var entries    = [];
   var activeTab  = 0;
   var activeLang = "en";
+  var seasonEn   = "";
+  var currentDate = null;
+  var mlRec      = null;    // Malayalam record of currentDate (days-ml)
+  var mlObligation = LITURGY_ML_UI_.obligation;
+  var mlState    = "idle";  // idle | loading | ready | none   (for currentDate)
 
   function showStatus(msg) {
     els.card.hidden = true;
@@ -1471,39 +1493,84 @@ function createReadingCard(els) {
     if (els.fallback) els.fallback.hidden = false;
   }
 
+  function mlCelebration(entryIdx) {
+    var c = mlRec && mlRec.celebrations && mlRec.celebrations[entryIdx];
+    return c || null;
+  }
+
+  // Labels on the celebration tabs follow the chosen language (English where there is no Malayalam yet)
+  function setTabLabels() {
+    if (!els.tabs) return;
+    els.tabs.querySelectorAll(".rd-tab-btn").forEach(function (b, i) {
+      var c = activeLang === "ml" && mlState === "ready" ? mlCelebration(i) : null;
+      var en = entries[i] ? (entries[i].celebration || "Celebration") : "";
+      b.textContent = (c && c.label) ? c.label : en;
+      if (c && c.label) b.setAttribute("lang", "ml"); else b.removeAttribute("lang");
+    });
+  }
+
+  function ensureMl() {
+    if (mlState !== "idle" || !currentDate) return;
+    mlState = "loading";
+    var date = currentDate;
+    liturgyYearMl_(+date.slice(0, 4), function (days, index) {
+      if (date !== currentDate) return;                 // the visitor moved to another date meanwhile
+      var rec = days && days[date];
+      if (index && index.malayalam && index.malayalam.obligation) mlObligation = index.malayalam.obligation;
+      if (rec && rec.celebrations && rec.celebrations.length === entries.length) { mlRec = rec; mlState = "ready"; }
+      else { mlRec = null; mlState = "none"; }
+      if (activeLang === "ml") renderBody();
+    });
+  }
+
   function renderBody() {
     var entry = entries[activeTab];
     if (!entry) return;
+    var ml = activeLang === "ml";
 
-    if (activeLang === "ml") {
-      // Malayalam has no translated Season/Celebration/readings yet — hide
-      // all of that (rather than showing it in English) so the card just
-      // shows the "coming soon" placeholder on its own.
-      els.season.hidden = true;
-      els.badge.hidden = true;
-      els.tabs.hidden = true;
-      els.body.innerHTML = '<p class="rd-ml-soon">Malayalam readings will be available soon.</p>';
+    if (ml && mlState === "idle") ensureMl();
+    var mlReady = ml && mlState === "ready";
+
+    els.season.hidden = false;
+    els.season.textContent = mlReady && mlRec.season ? mlRec.season : (seasonEn ? "Season of " + seasonEn : "");
+    if (mlReady && mlRec.season) els.season.setAttribute("lang", "ml"); else els.season.removeAttribute("lang");
+    els.badge.hidden = !entry.important;
+    els.badge.textContent = mlReady ? mlObligation : "Day of Obligation";
+    if (mlReady) els.badge.setAttribute("lang", "ml"); else els.badge.removeAttribute("lang");
+    els.tabs.hidden = entries.length <= 1;
+    setTabLabels();
+    updateTabsFade();
+
+    if (ml && !mlReady) {
+      // still loading, or this date has no Malayalam data: say so instead of showing English under a Malayalam button
+      els.body.innerHTML = '<p class="rd-ml-soon">' + (mlState === "none"
+        ? 'Malayalam readings are not available for this date right now.' : 'Loading Malayalam readings\u2026') + '</p>';
       els.notes.hidden = true;
       return;
     }
 
-    els.season.hidden = false;
-    els.badge.hidden = !entry.important;
-    els.tabs.hidden = entries.length <= 1;
-    updateTabsFade();
-
+    var mc = mlReady ? mlCelebration(activeTab) : null;
     var readings = entry.readings || [];
     els.body.innerHTML = readings.map(function (r, i) {
       var slotName = READING_SLOT_LABELS[r.slot] || r.slot;
+      var mr = mc && mc.readings && mc.readings[i];
+      if (mlReady && mr && mr.full) {
+        // Malayalam: full book names like the English card; the bracketed longer version as the Commission prints it. No titles (not in the Malayalam data).
+        var mlSlot = LITURGY_ML_UI_.slots[r.slot] || "";
+        var mlLabel = LITURGY_ML_UI_.reading + " " + (i + 1) + (mlSlot ? " (" + mlSlot + ")" : "");
+        return '<div class="rd-row">' +
+          '<span class="rd-row-label" lang="ml">' + escapeHtml(mlLabel) + '</span>' +
+          '<span class="rd-row-text" lang="ml"><strong>' + escapeHtml(mr.full + (mr.longer ? " (" + mr.longer + ")" : "")) + '</strong></span></div>';
+      }
       var label = "Reading " + (i + 1) + (slotName ? " (" + slotName + ")" : "");
       return '<div class="rd-row">' +
         '<span class="rd-row-label">' + escapeHtml(label) + '</span>' +
         '<span class="rd-row-text"><strong>' + escapeHtml(expandBookNames(r.ref || "")) + '</strong>' +
-        (r.title ? '<span>' + escapeHtml(r.title) + '</span>' : '') +
+        (!mlReady && r.title ? '<span>' + escapeHtml(r.title) + '</span>' : '') +
         '</span></div>';
     }).join("");
 
-    if (entry.notes) {
+    if (entry.notes && !mlReady) {
       els.notes.hidden = false;
       els.notes.textContent = "Note: " + entry.notes;
     } else {
@@ -1521,10 +1588,10 @@ function createReadingCard(els) {
 
     entries    = data.entries;
     activeTab  = 0;
-    activeLang = "en";
+    seasonEn   = data.season || "";
     if (els.langToggle) {
       els.langToggle.querySelectorAll(".rd-lang-btn").forEach(function (b) {
-        b.classList.toggle("is-active", b.dataset.lang === "en");
+        b.classList.toggle("is-active", b.dataset.lang === activeLang);
       });
     }
 
@@ -1532,7 +1599,7 @@ function createReadingCard(els) {
     if (els.fallback) els.fallback.hidden = true;
     els.card.hidden = false;
 
-    els.season.textContent = data.season ? "Season of " + data.season : "";
+    els.season.textContent = seasonEn ? "Season of " + seasonEn : "";
 
     els.tabs.innerHTML = "";
     if (entries.length > 1) {
@@ -1578,6 +1645,7 @@ function createReadingCard(els) {
 
   function load(dateStr) {
     var mySeq = ++reqSeq;
+    currentDate = dateStr; mlRec = null; mlState = "idle";
     showStatus("Loading readings…");
 
     if (cache[dateStr]) {
