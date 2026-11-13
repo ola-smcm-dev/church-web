@@ -1509,6 +1509,24 @@ function createReadingCard(els) {
     });
   }
 
+  // A day with ONE celebration has no tabs, so its name (e.g. "Second Sunday of Dedication of the Church") is shown as a heading line
+  var titleEl = null;
+  function setTitle(mlReady) {
+    if (!els.tabs || !els.tabs.parentNode) return;
+    if (!titleEl) {
+      titleEl = document.createElement("p");
+      titleEl.className = "rd-celeb-title";
+      titleEl.style.cssText = "margin:.1rem 0 .7rem;font-weight:700;font-size:1.02rem;line-height:1.35;color:var(--navy)";
+      els.tabs.parentNode.insertBefore(titleEl, els.tabs);
+    }
+    if (entries.length !== 1) { titleEl.hidden = true; return; }
+    var c = mlReady ? mlCelebration(0) : null;
+    var text = (c && c.label) ? c.label : (entries[0].celebration || "");
+    titleEl.textContent = text;
+    if (c && c.label) titleEl.setAttribute("lang", "ml"); else titleEl.removeAttribute("lang");
+    titleEl.hidden = !text;
+  }
+
   function ensureMl() {
     if (mlState !== "idle" || !currentDate) return;
     mlState = "loading";
@@ -1539,6 +1557,7 @@ function createReadingCard(els) {
     if (mlReady) els.badge.setAttribute("lang", "ml"); else els.badge.removeAttribute("lang");
     els.tabs.hidden = entries.length <= 1;
     setTabLabels();
+    setTitle(mlReady);
     updateTabsFade();
 
     if (ml && !mlReady) {
