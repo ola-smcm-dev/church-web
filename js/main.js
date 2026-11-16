@@ -2197,10 +2197,19 @@ function initMassTimes() {
         lab.className = "hg-row-label";
         lab.appendChild(document.createTextNode(x.label));
         if (x.note) {
-          lab.appendChild(document.createElement("br"));
-          var em = document.createElement("em");
-          em.textContent = x.note.replace(/^\(\s*|\s*\)$/g, "");
-          lab.appendChild(em);
+          // A "|" (or a typed <br>) in the Note starts a new line, e.g.
+          // "in Malayalam | English Mass every 3rd Sunday". Each line is plain text
+          // (textContent), so nothing typed in the sheet is ever run as HTML.
+          var noteLines = x.note
+            .split(/\s*(?:\||<br\s*\/?>)\s*/i)
+            .map(function (t) { return t.replace(/^\(\s*|\s*\)$/g, "").trim(); })
+            .filter(Boolean);
+          noteLines.forEach(function (line) {
+            lab.appendChild(document.createElement("br"));
+            var em = document.createElement("em");
+            em.textContent = line;
+            lab.appendChild(em);
+          });
         }
 
         // Frequency badge ("EVERY SUNDAY" etc., uppercased via CSS) stacked
