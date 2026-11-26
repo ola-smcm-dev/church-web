@@ -19,15 +19,16 @@ NAV = [
                                                         ("Syro Malabar Church", "about-syro-malabar-church.html")]),
   ("Faith Formation", "faith-formation.html",          [("Religious Education", "religious-education.html"),
                                                         ("CML (Cherupushpam Mission League)", "cml.html"),
-                                                        ("Youth Faith Formation", "youth-faith-formation.html")]),
+                                                        ("Youth Faith Formation", "youth-faith-formation.html"),
+                                                        ("Quiz Practice", "quiz.html")]),
   ("Prayer Books",    "prayer-books.html",             []),
   ("Parish Calendar", "calendar.html",                 []),
-  ("Media",           "media.html",                    []),
+  ("Parish Life",     "parish-life.html",              []),
   ("Contact",         "CONTACT",                       []),
 ]
 FOOTER_LINKS = [("About Our Church","about-church.html"),("Faith Formation","faith-formation.html"),
                 ("Prayer Books","prayer-books.html"),("Parish Calendar","calendar.html"),
-                ("Videos &amp; Photos","media.html"),("Donate","DONATE")]
+                ("Parish Life","parish-life.html"),("Donate","DONATE")]
 
 def resolve(link, is_home):
     if link == "HOME":    return "#home" if is_home else "index.html"

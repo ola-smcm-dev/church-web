@@ -111,6 +111,17 @@ const CONFIG = {
   // (See the setup guide — one script serves both the videos and the photos.)
   // Leave blank to keep the video/photo sections hidden.
   mediaApiUrl: "https://script.google.com/macros/s/AKfycbzJL--PN1ecKEqLkEin0l7adW1Xj9kubVjMxJnnoqY_QURFtd_C2mUzlWf8XQ6nhMRpdQ/exec",
+
+  // ── Parish Life page (parish-life.html) ──
+  // The published CSV link of the "Parish Life" tab in the WebAdmin sheet (only Approved stories are in
+  // that tab). Leave blank to show "stories will appear here soon". Photos come from the Media API
+  // (?action=highlights), so mediaApiUrl above must stay set.
+  parishLifeSheetUrl: "",
+
+  // ── Quiz Practice page (quiz.html) ──
+  // The /exec URL of the Quiz API (Apps Script, QuizAPI.gs, reading the private Quiz Bank sheet).
+  // Leave blank to show "practice quizzes will be available soon".
+  quizApiUrl: "https://script.google.com/macros/s/AKfycbxsbPlZNrwRR82717w4WSwDALtcY6qlGmqpnmAg7KMPvs4JLNrLzhy5zRumqT64xpfq/exec",
 };
 
 /* ═════════════════════════════════════════════════════
