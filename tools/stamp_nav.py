@@ -20,7 +20,7 @@ NAV = [
   ("Faith Formation", "faith-formation.html",          [("Religious Education", "religious-education.html"),
                                                         ("CML (Cherupushpam Mission League)", "cml.html"),
                                                         ("Youth Faith Formation", "youth-faith-formation.html"),
-                                                        ("Quiz Practice", "quiz.html")]),
+                                                        ("Bible Quiz - Dei Verbum", "quiz.html")]),
   ("Prayer Books",    "prayer-books.html",             []),
   ("Parish Calendar", "calendar.html",                 []),
   ("Parish Life",     "parish-life.html",              []),

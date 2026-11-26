@@ -36,7 +36,7 @@ const CONFIG = {
   // ── Mass offerings & hosted prayers (Join Us section) ──
   // Address of the Google Form where parishioners request a Mass offering or sign up
   // to host a prayer (Rosary, Way of the Cross...). Leave "" to hide the button.
-  massOfferingUrl: "https://forms.gle/uC3eV76QTXrfxFZm8",
+  massOfferingUrl: "",   // 2026-11-26: "Offer a Mass or Host a Prayer" button removed from Join Us (kept empty)
 
   // Published CSV of the WebAdmin "Mass Offerings" tab (Date | Name | Source) — who is
   // offering the Holy Mass on a date. Shown in the calendar day popup. Leave "" to hide.
