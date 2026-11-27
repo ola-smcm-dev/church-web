@@ -134,9 +134,10 @@
     show("setup");
     var quiz = findQuiz(sel.quiz);
 
-    var h = el("h3", "qz-h", "Choose your quiz");
+    var h = el("h3", "qz-sr", "Choose your quiz");
     h.setAttribute("data-focus", "1");
     elSetup.appendChild(h);
+    elSetup.appendChild(el("p", "qz-intro", "Pick a quiz and a chapter, then answer one question at a time. Nothing about you is saved."));
 
     // 1. quiz tabs
     var c1 = el("div", "qz-card");

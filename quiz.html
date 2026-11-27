@@ -21,7 +21,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=20261126">
+  <link rel="stylesheet" href="css/style.css?v=20261126b">
   <script src="js/seasonal.js?v=20261126"></script>
   <script type="application/ld+json">
   {
@@ -131,7 +131,7 @@
     <!-- PAGE HERO -->
     <div class="page-hero">
       <div class="page-hero-inner container">
-        <span class="ornament ornament-light" aria-hidden="true">✦ ✦ ✦</span>
+        <p class="page-hero-eyebrow">Faith Formation</p>
         <h1>Bible Quiz - Dei Verbum</h1>
         <p class="page-hero-sub">Get ready for the diocese quiz, one chapter at a time</p>
       </div>
@@ -139,14 +139,8 @@
 
     <!-- The quiz itself is drawn by js/quiz.js. Questions live in a private Google Sheet and are served by the
          Quiz API (CONFIG.quizApiUrl in js/main.js); the answers are only sent after a child submits. -->
-    <section class="section section-cream" id="quizApp" aria-labelledby="qz-heading">
+    <section class="section section-cream" id="quizApp" aria-label="Bible quiz practice">
       <div class="container qz-wrap">
-        <div class="section-header">
-          <p class="ornament">✦ ✦ ✦</p>
-          <h2 id="qz-heading">Practice Quiz</h2>
-          <p class="section-subtitle">Pick a quiz, choose a chapter and test yourself. Nothing about you is saved.</p>
-        </div>
-
         <div id="qzStatus" aria-live="polite"><p class="qz-msg">Loading&hellip;</p></div>
         <div id="qzSetup" hidden></div>
         <div id="qzPlay" hidden></div>
@@ -208,6 +202,6 @@
 
   <a href="#main-content" class="back-to-top" id="backToTop" aria-label="Back to top">&#8679;</a>
   <script src="js/main.js?v=20261126"></script>
-  <script src="js/quiz.js?v=20261126"></script>
+  <script src="js/quiz.js?v=20261126b"></script>
 </body>
 </html>
