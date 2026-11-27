@@ -21,13 +21,14 @@ NAV = [
                                                         ("CML (Cherupushpam Mission League)", "cml.html"),
                                                         ("Youth Faith Formation", "youth-faith-formation.html"),
                                                         ("Bible Quiz - Dei Verbum", "quiz.html")]),
-  ("Prayer Books",    "prayer-books.html",             []),
+  ("Resources",       "resources.html",                [("Prayer Books", "prayer-books.html"),
+                                                        ("Songs", "songs.html")]),
   ("Parish Calendar", "calendar.html",                 []),
   ("Parish Life",     "parish-life.html",              []),
   ("Contact",         "CONTACT",                       []),
 ]
 FOOTER_LINKS = [("About Our Church","about-church.html"),("Faith Formation","faith-formation.html"),
-                ("Prayer Books","prayer-books.html"),("Parish Calendar","calendar.html"),
+                ("Resources","resources.html"),("Parish Calendar","calendar.html"),
                 ("Parish Life","parish-life.html"),("Donate","DONATE")]
 
 def resolve(link, is_home):

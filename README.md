@@ -68,3 +68,9 @@ The top bar + menu are identical on every page and are **stamped into each page'
 - Sub-pages have no visible breadcrumb line (the menu shows where you are); instead each carries a hidden `BreadcrumbList` JSON-LD block in `<head>` (Home › [Faith Formation ›] page) — copy one when adding a page.
 - Any new page should carry the standard SEO `<head>` block (canonical link, Open Graph tags including `og:site_name`, meta description) used on the existing pages, and be added to `sitemap.xml` (or excluded via `robots.txt` if it's meant to stay unlisted).
 - Feast days and days of obligation come from the `SyroMalabarDates` tab of the WebAdmin sheet (published as CSV; `CONFIG.syroDatesSheetUrl` in `js/main.js`). Fixed feasts (e.g. "December 25") repeat every year automatically; movable feasts (rule text such as "Third Friday of Apostles") are worked out from the Easter date. An optional `Resolved Date` column overrides the computed date for a given year. The old hand-typed `IMPORTANT_DATES` list is gone.
+
+## Resources, Songs (added 2026-11-27)
+- `resources.html` is the hub of the **Resources** menu (Prayer Books, Songs). The menu itself lives in `tools/stamp_nav.py` (re-run it after editing).
+- `songs.html` + `js/songs.js` show about 8,300 song lyrics (Malayalam and Manglish) with an A to Z index, search (title + first 4 lines) and a language toggle. The song text lives in the static `songs/` folder (`index.json`, `search.json`, `c/NNN.json`), which is **generated** by `tools/build_songs.py` from the big source JSON (keep that source file outside the website folder, e.g. in `Claude outputs`, and never upload it).
+  Rebuild: `python3 tools/build_songs.py "Claude outputs/qurbana_songs_lyrics.json"` from the website folder, then upload the whole `songs/` folder.
+- `songs.html` and `resources.html` are `noindex` for now; no credits are shown (to be decided).
