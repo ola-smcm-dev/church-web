@@ -52,8 +52,8 @@ const CONFIG = {
   // googleClientId: the OAuth client id from Google Cloud (ends in .apps.googleusercontent.com). It is public by design.
   // parishionersApiUrl: web app address (ends in /exec) of the "Parishioners API" Apps Script (see
   // Claude outputs\Parishioners-API\SETUP-PARISHIONERS.txt). Leave either blank and the page says it is not switched on.
-  googleClientId: "",
-  parishionersApiUrl: "",
+  googleClientId: "169757114836-gkor9am9oe1r4ai71er76s91afmlqge9.apps.googleusercontent.com",
+  parishionersApiUrl: "https://script.google.com/macros/s/AKfycbwcXbMN0WGfG8BjOos4wBUAwJvjLOAvg-A7zAxvJV1-HxPxcgWZ71P4RC3olDFXH000/exec",
 
   // ── Google Maps ──────────────────────────────────
   // Pins the street address only (no business name). To change it, edit the address after q= (use + for spaces).
