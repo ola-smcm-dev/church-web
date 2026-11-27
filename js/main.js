@@ -116,7 +116,7 @@ const CONFIG = {
   // The published CSV link of the "Parish Life" tab in the WebAdmin sheet (only Approved stories are in
   // that tab). Leave blank to show "stories will appear here soon". Photos come from the Media API
   // (?action=highlights), so mediaApiUrl above must stay set.
-  parishLifeSheetUrl: "",
+  parishLifeSheetUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQstvLh_QqffEF3nw_D9UmJtsni7umIr4rYGJQkVUYUbT_ABwTwZCKVvUmtTHU71N2GJH-oK1ZzHPBP/pub?gid=994113013&single=true&output=csv",
 
   // ── Quiz Practice page (quiz.html) ──
   // The /exec URL of the Quiz API (Apps Script, QuizAPI.gs, reading the private Quiz Bank sheet).
