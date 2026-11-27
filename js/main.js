@@ -48,6 +48,13 @@ const CONFIG = {
   // Leave blank to fall back to opening the visitor's email app instead.
   formsScriptUrl: "https://script.google.com/macros/s/AKfycbzts7DEdylQz72HWe8Zi6r2iUL7k5_TtDmnVTrwJFLGymWizmcBkqZaF2tQwbfR8JdD_A/exec",
 
+  // ── Parishioners page (sign in with Google → offerings calendar) ──
+  // googleClientId: the OAuth client id from Google Cloud (ends in .apps.googleusercontent.com). It is public by design.
+  // parishionersApiUrl: web app address (ends in /exec) of the "Parishioners API" Apps Script (see
+  // Claude outputs\Parishioners-API\SETUP-PARISHIONERS.txt). Leave either blank and the page says it is not switched on.
+  googleClientId: "",
+  parishionersApiUrl: "",
+
   // ── Google Maps ──────────────────────────────────
   // Pins the street address only (no business name). To change it, edit the address after q= (use + for spaces).
   googleMapsEmbedUrl: "https://www.google.com/maps?q=838+Kings+Hwy+E,+Fairfield,+CT+06825&output=embed",

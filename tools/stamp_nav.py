@@ -29,7 +29,7 @@ NAV = [
 ]
 FOOTER_LINKS = [("About Our Church","about-church.html"),("Faith Formation","faith-formation.html"),
                 ("Resources","resources.html"),("Parish Calendar","calendar.html"),
-                ("Parish Life","parish-life.html"),("Donate","DONATE")]
+                ("Parish Life","parish-life.html"),("Parishioners","parishioners.html"),("Donate","DONATE")]
 
 def resolve(link, is_home):
     if link == "HOME":    return "#home" if is_home else "index.html"
@@ -71,6 +71,7 @@ def header_html(page, social):
     <div class="topbar-inner">
 {social}
       <div class="topbar-right">
+        <a href="parishioners.html" class="topbar-link">Parishioners</a>
         <a href="{donate}" class="topbar-donate-btn">Donate</a>
       </div>
     </div>
@@ -112,6 +113,9 @@ def stamp(page, src):
         src = re.sub(r'(<a href="#main-content" class="skip-link">[^<]*</a>\n).*?(?=\n\s*<main)',
                      lambda m: m.group(1) + '\n  ' + hdr, src, count=1, flags=re.S)
     src = re.sub(r'<h4>Quick Links</h4>\s*<ul role="list">.*?</ul>', lambda m: footer_links(page), src, flags=re.S)
+    # Privacy Policy / Terms of Use links in the footer bar (idempotent)
+    src = re.sub(r'\n\s*<p class="footer-legal">.*?</p>', '', src, flags=re.S)
+    src = src.replace('        <p class="footer-credit">', '        <p class="footer-legal"><a href="privacy.html">Privacy Policy</a> &middot; <a href="terms.html">Terms of Use</a></p>\n        <p class="footer-credit">', 1)
     return src
 
 if __name__ == '__main__':
